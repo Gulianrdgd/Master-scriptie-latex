@@ -1,0 +1,148 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}     % for éô
+\usepackage[english]{babel}     % for proper word breaking at line ends
+\usepackage[a4paper, left=1.5in, right=1.5in, top=1.5in, bottom=1.5in]{geometry}
+                                % for page size and margin settings
+\usepackage{graphicx}           % for ?
+\usepackage{amsmath,amssymb}    % for better equations
+\usepackage{amsthm}             % for better theorem styles
+\usepackage{mathtools}          % for greek math symbol formatting
+\usepackage{varwidth}
+\usepackage{enumitem}           % for control of 'enumerate' numbering
+\usepackage{listings}           % for control of 'itemize' spacing
+\usepackage{todonotes}          % for clear TODO notes
+\usepackage[hidelinks]{hyperref}           % page numbers and '\ref's become clickable
+\usepackage{pgfplots}
+\usepackage{caption}
+\usepackage{parskip}
+\usepackage{makecell}
+\usepackage{tabularx} 
+
+% \pgfplotsset{width=10cm,compat=1.9}
+
+
+% Listing style
+
+%% Package for colors.
+\usepackage{xcolor}
+%% Useful colors
+\definecolor{blue}{RGB}{0,0,255}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{1,0.973,0.906}
+\definecolor{mygray}{gray}{0.96}
+
+%% Code listing style named "mystyle"
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{mygray},
+  %commentstyle=\color{codegreen},
+  %keywordstyle=\color{magenta},
+  %numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\footnotesize,
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                 
+%   numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
+}
+% "mystyle" code listing set
+\lstset{style=mystyle}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SET TITLE PAGE VALUES HERE %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%             ||               %
+%             ||               %
+%             \/               %
+
+\def\thesistitle{Backdoor attack on deep neural networks using inaudible triggers}
+\def\thesissubtitle{Ultrasonic trigger inaudible to humans but not machines}
+\def\thesisauthorfirst{Julian van der Horst \\ s1015357}
+\def\thesisauthorsecond{}
+\def\thesissupervisorfirst{Stjepan Picek}
+\def\thesissupervisorsecond{Stefanos Koffas}
+\def\thesissecondreaderfirst{Güneş Acar}
+\def\thesissecondreadersecond{Martha Larson}
+\def\thesisdate{May 2023}
+
+
+%% FOR PDF METADATA
+\title{\thesistitle}
+\author{\thesisauthorfirst\space\thesisauthorsecond}
+\date{\thesisdate}
+
+%% TODO PACKAGE
+\newcommand{\towrite}[1]{\todo[inline,color=yellow!10]{TO WRITE: #1}}
+
+%% THEOREM STYLES
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+
+%% MATH OPERATORS
+\DeclareMathOperator{\supersine}{supersin}
+\DeclareMathOperator{\supercosine}{supercos}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\begin{titlepage}
+	\thispagestyle{empty}
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\textsc{\Large Radboud University Nijmegen}\\[.7cm]
+	\includegraphics[width=25mm]{img/in_dei_nomine_feliciter.eps}\\[.5cm]
+	\textsc{Faculty of Science}\\[0.5cm]
+	
+	\HRule \\[0.4cm]
+	{ \huge \bfseries \thesistitle}\\[0.1cm]
+	\textsc{\thesissubtitle}\\
+	\HRule \\[.5cm]
+	\textsc{\large Thesis MSc Computing Science}\\[.5cm]
+	
+	\begin{minipage}{0.4\textwidth}
+	\begin{flushleft} \large
+	\emph{Author:}\\
+	\thesisauthorfirst\space \textsc{\thesisauthorsecond}
+	\end{flushleft}
+	\end{minipage}
+	~
+	\begin{minipage}{0.4\textwidth}
+	\begin{flushright} \large
+	\emph{Supervisor:} \\
+	\thesissupervisorfirst  \\[1em]
+    \emph{Daily supervisor:} \\
+    \thesissupervisorsecond \\[1em]
+	\emph{Second reader:} \\
+	\thesissecondreaderfirst\\ 
+    % \thesissecondreadersecond
+	\end{flushright}
+	\end{minipage}\\[4cm]
+	\vfill
+	%{\large \thesisdate}\\
+	{\large \today}\\
+	\clearpage
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+\section*{Abstract}
+
+\end{document}
