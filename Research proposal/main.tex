@@ -40,5 +40,44 @@
 \begin{document} 
 \maketitle
 \section{Introduction}
+This document will outline the research I will be doing for my Master thesis. In general, I will do research into video calling in PubHubs. I will research the challenges and architectural designs needed to make such a feature. 
+\section{PubHubs}
+Let me start by introducing PubHubs. PubHubs, short for Public Hubs, is an alternative community platform that puts public values first \cite{PH}. Where social media platforms like Instagram or Twitter make the individual central in their network, PubHubs makes a community central. The reasoning behind that is that this behavior closely resembles normal human interaction, where humans have small groups of friends with whom they interact. The way people experience social media now is very unnatural where if they engage with a platform it is shouted into the whole world.
+
+"PubHubs is organized as a network of independent hubs, with a shared single-sign-on. Conversa-
+tions take place in local hubs (and not globally) and the associated (conversation) data is managed
+decentrally, within each hub" \cite{PH}. Privacy is one of the core values of PubHubs, which can be seen in how it handles identity management. \todo{continue}
+
+Messages are sent via matrix. 
+
+\section{Video conferincing}
+During the COVID-19 pandemic, there was a big need for remote work. Immediately services like Zoom \cite{Zoom} and Microsoft Teams \cite{MSTeams} became very popular. These tools allowed video conferencing between different remote locations in real-time. Video conferencing can be done in multiple ways but during this research, we will distinguish three types. Person-to-person (One on one), Person-to-person group, and speaker-to-audience. We distinguish these types because they all have certain properties that make their solution unique or possess some problems that will need to be resolved.
+
+The research will be about authenticated video calls so considering these three types how do authenticated voice calls look like? This means that we need to make sure that the video stream is coming from the identity that they say they are. \todo{expand}
+
+With video conferencing, people need to send and receive video streams, and they want to do this ideally in real time. A standard for that is WebRTC and it is now widely supported in browsers (97.77\%) \cite{CIUIWEBRTC}. WebRTC is both a protocol and an API that can be used for many things including video and audio communication. Matrix even has support for WebRTC and uses it in their main testing application Element \cite{ELEMENT}. 
+
+To send this media to another person we have three ways of doing it. We either send the data in a P2P network. This means that the people in the call send their stream to every other person in the call. This makes it so that the server has no extra load, since it does not handle any video streams. However, with every extra participant, every user needs to send/receive more and more data, at some point a bottleneck is reached and no extra participant can be added or a loss in data will occur. 
+
+Another option would be to have a media server where the users would send their video streams and would get the incoming video streams. For such a media server we have two types: SFU (Selective forwarding unit) and MCU (Multipoint control unit). An SFU behave in a way like a switch where it would selectively forward streams between clients, it does not interact with the video streams so it would work similarly with encrypted and unencrypted data.  
+
+An MCU on the other hand takes in many media streams and combines it into one media stream. This makes it so that it can work very with legacy systems since they can receive various types of media and then output a standardized output. The MCU has to decode all the incoming media signals, which makes it costly at large scale since the CPU usage would be very high.
+
+\section{Element call}
+
+\todo{Uitleggen hoe zij het doen}
+
+\section{Research question}
+
+How to do authenticated video calls in PubHubs?
+    How to do privacy-friendly calls (Who should be able to see what)
+    How to do encrypted video calls
+    How to keep this code maintainable
+    
+Possible: How to limit load on the hub
+Possible: How to keep it understandable for users    
+
+\bibliographystyle{plain}
+\bibliography{main.bib}
 
 \end{document}
