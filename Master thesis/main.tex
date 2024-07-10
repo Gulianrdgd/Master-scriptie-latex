@@ -180,7 +180,7 @@
 
     \begin{figure}[!hbt]
         \centering
-        \includegraphics[width=0.7\textwidth]{Research proposal/img/three types.drawio.png}
+        \includegraphics[width=0.7\textwidth]{img/three-types}
         \caption{The three types of video conferencing}
         \label{fig:enter-label}
     \end{figure}
@@ -270,10 +270,14 @@
 
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{Master thesis/img/PH_videocall.excalidraw.png}
+        \includegraphics[width=\textwidth]{img/PH_videocall.excalidraw.png}
         \caption{Caption}
-        \label{fig:enter-label}
+        \label{fig:video-conference-setup}
     \end{figure}
+
+    This setup can be fully removed from a hub, should a hub not want video conferencing. It is standing on its own and
+    can be toggled on or off using a feature flag. Everything is programmed in such a way that it is completely isolated
+    from the rest of Pubhubs.
 
 
     \section{Server setup}
@@ -287,39 +291,62 @@
     \texttt{GET /\_synapse/client/videocall} We use this endpoint ot authenticate the user and set up a video call
     in livekit. For that we need to create a room and add the user to that room. We can add all sorts of checks to allow
     a user to join a room,like checking if the user is in the room, if the room exists, if the user is allowed to
-    join the room, etc.\TODO{Add checks if user is in Room} The requirements are not set in stone and can be
-    changed to fit the needs of the hub server.
+    join the room, etc. The requirements are not set in stone and can be changed to fit the needs of the hub server.
+    For now we check if the user is allowed to join the room and otherwise return a 403.
 
-    The hub server authenticates the user by checking the authentication token on
-    the request. These tokens are again the same as when a user request any other data from the hub server.The response
-    of this call will be the video call token from livekit for this pseudonym and for this room. This token can then
-    be used by livekit to authenticate the user.
+    The hub server authenticates the user by checking the pubhubs authentication token on the request. These tokens are
+    the same as when a user request any other data from the hub server. The response of this call will be an
+    access token from livekit for this pseudonym and for this room. This token can then be used by livekit to
+    authenticate the user. Ideally we would not have another token which would in turn be used to authenticate the
+    user, however this allows us to have a separation between the hub server and the livekit server. This way we can
+    even host the livekit server on a different server than the hub server. This is a good idea since the
+    livekit server will have a lot of high bandwidth traffic and we do not want to overload the hub server with
+    this traffic, essentially denying service to other user because we have a large video call. The user then
+    has the livekit token, which it will provide when sending and receiving data from the SFU. Non authenticated
+    media will be rejected.
 
-    Ideally we would not have another token which would in turn be used to authenticate the user, however this allows us
-    to have a separation between the hub server and the livekit server. This way we can even host the livekit server on
-    a different server than the hub server. This is a good idea since the livekit server will have a lot of
-    high bandwidth traffic and we do not want to overload the hub server with this traffic, essentially denying service
-    to other user because we have a large video call. The user then has the livekit token, which it will provide when
-    sending and receiving data from the SFU. Non authenticated media will be rejected.
+    \section{Video conferencing flow}
+    Here we deviate somewhat from the original matrix specification. Since the spec also includes a protocol for
+    sharing which media devices are being used, we will not use this since livekit can handle this for us. Instead
+    of sharing a lot of information about our setup and endpoints, we only need to know that a call has started and
+    if the call is encrypted we need to know the encryption keys of the participants. Livekit will provide us with
+    an endpoint where we can send and receive our data, which in turn forwards it to the others in our room. We
+    will thus only use the matrix protocol for setting up the room and sending the keys. This approach is also what
+    matrix intends to do moving forward, as they have speicified in a presentation \TODO{find presentation}. The
+    matrix team now support both solutions in their client sdk.
 
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.6\textwidth]{img/Callflow.excalidraw.png}
+        \caption{The video conferencing flow}
+        \label{fig:video-conference-flow}
+    \end{figure}
 
-    \section{Call flow}
-    This flow is separated from the video conferencing room infrastructure.
-    This is according to the new matrix spec done on Matrix itself. Recently, Matrix has changed its spec to let all the
-    media handling be done outside of matrix
-    and only concern matrix with setting up a room and sending invitations to the participants. So the only messages
-    that are being sent over matrix are:
+    When Alice wants to start a call with Bob, she will sent a call event with an intent. This intent can be
+    everything from having the room automatically join to ringing the other participants. We did not implement
+    these different behaviours since it was out of scope. After this her client will setup the video conferncing
+    screen, this is where she can choose her camera and microphone. When she is ready Alice will send her encyption
+    keys and will send to the others that she is a member of the call. She will then wait for any changes to the participants
+    if that happens she will update her keys and send them to the others.
 
-    \begin{itemize}
-        \item Init video call
-        \item My encryption keys
-        \item Join video call messages
-        \item New encryption keys
-    \end{itemize}
+    Bob will receive the call event and decides to join the call. His client will setup the video conferencing
+    screen where he can choose his camera and microphone. When he is ready Bob will send his encyption keys and will
+    send to the others that he is a member of the call. Since Alice can see that there is a new participant she will
+    update her keys and send them to Bob. Now they have all the keys of all the pariticpants and they can decrypt their
+    video and audio streams.
 
-    This setup can be fully removed from a hub, should a hub not want video conferencing. It is standing on its own and
-    can be toggled on or off using a flag. Everything is programmed in such a way that it is completely isolated from
-    the rest of Pubhubs.
+    Alice sent her keys twice which is not strictly necessary, however using this we can have a simple code base
+    without having to check if the keys are already sent. The setup of a call is now the same, regardless whether
+    the call is new or already ongoing. This makes the code easier to understand and maintain.
+
+    Altough the keys are sent in the clear, they are only sent to the other participants in the call. This means that
+    only the participants in the call can decrypt the video and audio streams. Ideally we would send private
+    messages to the participants in the call, which is also possible within matrix. However this is not the default
+    currently since matrix is transitioning to a new end-to-end encryption library which is not yet fully implemented.
+    We have been in contact with the matrix team and they are working on this feature, so we decided to leave the code
+    as is and wait for the new implementation. This means that until we have the new implementation we do not have
+    full forward secrecy.
+
 
 
     \section{Encryption}
@@ -344,7 +371,9 @@
     Currently, the matrix team has enabled e2ee, but they used a now old C++ implementation of Olm. They are now moving
     toward their new Rust implementation of it. It is not completely up to par, but the features we need are here. We
     don't need much for the encryption of video calls, however, when we use the crypto library to create random keys
-    which we will send and use to encrypt our sources.
+    which we will send and use to encrypt our sources. Since we need to initialize the matrix crypto library, we can
+    very easily enable end-to-end encryption for other messages in Pubhubs. We have done some experiments with this,
+    which we will discuss in a later chapter.
 
 % \newpage
 % \section{Research question}
@@ -379,6 +408,7 @@
 
 % — How can we develop a video conferencing prototype within the existing Pubhubs ecosystem, while simultaneously
 %     considering different hub client implementations?
+\chapter{Future work}
 
     \bibliographystyle{plain}
     \bibliography{references.bib}
