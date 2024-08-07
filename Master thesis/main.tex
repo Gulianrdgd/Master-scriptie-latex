@@ -131,6 +131,15 @@
     \chapter{Introduction}
 
 
+    \section{Video conferencing in PubHubs}
+    It is safe to say that PubHubs has a lot of potential but is currently still looking for a suitable use case. We
+    believe that having the ability to video call within PubHubs can be a great use case. This can be used for a lot of
+    applications, like online consultations, online classes, or just to have a chat with friends. However, currently
+    there are no organisations which are using PubHubs for this. So it is hard to say what the exact requirements are
+    for video calling in PubHubs. We will have to make some assumptions and then validate these assumptions with the
+    some testers\TODO{Misschien daadwerkelijk handig}. We will also have to look at the current privacy
+    considerations of PubHubs and see how we can implement video calling in a privacy-friendly way.
+
     \chapter{Background}
     We will make use of existing tools to build functionality in to pubhubs. We will need to introduce some background
     information first.
@@ -236,10 +245,19 @@
     We will use this implementation as a guide during our research; however, we will evaluate all the different choices
     made for Element call and deviate from them based on the requirements of PubHubs. When using Livekit we can easily
     implement features like noise suppression or video simulcast (Sending multiple video streams with different
-    qualities, to dynamically choose the quality according to a user's internet connection).
+    qualities, to dynamically choose the quality according to a user's internet connection). On the other hand it
+    also makes pubhubs dependent on Livekit, which is a third party service.
 
 
-    \chapter{Current privacy considerations}
+    \chapter{Requirements}
+
+    \section{Maintainability vs flexibility}
+    Pubhubs is a platform that is still in development and is constantly changing. This means that the video conferencing
+    solution should be able to adapt to these changes. This means that the code should be written in such a way that it
+    is easy to change and maintain. However, this should not come at the cost of flexibility. The video conferencing
+    solution should be able to adapt to the different needs of the hubs.
+
+
 
 
     \section{Separation of the client}
@@ -285,7 +303,23 @@
     functions as an SFU and will forward all the video and audio traffic between the different clients. This server will
     not see the video data which is sent since they are encrypted and the server does not have access to the keys. The
     only thing that the livekit server sees it the local pseudonym of the user, which the hub server already knows and
-    thus does not leak additional data.
+    thus does not leak additional data. The livekit server can handle a lot of traffic but when the hub is very large
+    and has a lot of video calls, it might be a good idea to have a separate livekit server. This way the hub server
+    will not be overloaded with video traffic and can still serve the rest of the users. The livekit server can also
+    scale horizontally to handle more traffic. This requires no extra programming but it is simply a matter of deploying
+    more livekit servers and configuring them to work together. Livekit provides a CLI tool which can give an
+    indication what the maximum amount of users is that a livekit server can handle. This way the hub server can decide
+    when to scale up the livekit server.
+
+    To give some indication, a livekit server running in a google cloud compute instance with 16 cores (
+    c2-standard-16), has around 85 \% CPU utilization when 150 users with 720p video and audio are connected
+    \cite{noauthor_benchmarking_nodate}. The hub sever can also choose to completly outsource the livekit server.
+    Livekit provides a paid service where they will host the livekit server for you. This service scales
+    automatically and the servers are distributed globally. This way the users will always have a proper low
+    latency connection to a livekit server. This however is a tradeoff between privacy and ease of use. When using
+    the livekit service, livekit will not have access to the video conferencing data, but they will have access to
+    the hub pseudonyms of the users and other metadata. This is a tradeoff that the hub server will have to make,
+    but we do not recommend that they do.
 
     We have also set up a new route and web request handler on the hub server.
     \texttt{GET /\_synapse/client/videocall} We use this endpoint ot authenticate the user and set up a video call
@@ -353,20 +387,31 @@
 
     For video calling, we want to have end-to-end encryption. This encryption should ideally also have forward secrecy.
     Meaning that new participants cannot decrypt previous messages. Livekit provided an e2ee worker, which locally
-    encrypts and decrypts incoming messages. For that, we do need the keys from all participants. Matrix is now in the
-    middle of transitioning to a new spec where the client can more directly request, revoke and rotate keys of the
-    participants.
+    encrypts and decrypts incoming messages. This worker is a web worker, which is a separate thread that runs in the
+    background. This way the main thread is not blocked by the encryption and decryption process. The worker uses the
+    WebCrypto API, which is a widely used and tested API for encryption and decryption. These APIs are now common in all
+    modern browsers, so we can be sure that the encryption and decryption will work on all devices.
 
-    We subscribe to a Matrix\_RTC\_
-    Session. This will give us messages when a new user is added or when the keys are updated. Whenever we get an
-    updated key message from the rtc\_
-    session, we pass it through livekit, which in turn updates the keys and derives new keys from that key. It simply
-    takes the key from matrix\_rtc and uses that as a seed.
+    Livekit uses Advanced Encryption Standard cipher in Galois/Counter Mode (AES-GCM), to encrypt and authenticate the
+    frames. This is a widely used and researched block cipher which is even used by Netflix \TODO{Add ref, is in Zotero}).
+    It is also very fast, which is important for video calling. The key is derived from the key that is sent by the
+    participants in the call. This key is then used to decrypt the video and audio frames from the other participants.
 
-    Livekit uses AES-GCM, to encrypt the frames. This is a widely used and researched block cipher, meaning that once we
-    have provided it with a key, we can have freshly encrypted video conferencing data. We chose to use the built-in
-    encryption tools from matrix, this way we don't need to reinvent the wheel and add extra strain on the developers by
-    developing a full-blown crypto system on top of the Pubhubs application.
+    \TODO{UItbreiden en aan elkaar plakken}
+
+    For the encryption to work, we do need the keys from all participants. To get these keys we followed the matrix
+    specification for ease of implementation and code sustainability. As of the writing, matrix is in the middle of transitioning to a
+    new spec where the client can more directly request, revoke and rotate keys of the participants. Altough this would
+    be a better solution, we decided to stick with the current implementation since the new implementation is not yet
+    fully implemented.
+
+    Whenever we are in a call we subscribe to a Matrix\_RTC\_Session. This session handles memberschips and
+    properties of a session. This will give us messages when a new user is added or when the keys are updated.
+    Whenever we get an updated key message from the rtc\_session, we pass it through livekit, which in turn updates
+    the keys and derives new keys from that key. It simply takes the key from matrix\_rtc and uses
+    that as a seed. Altough it is not implemented, users can also rotate their keys. This is a feature that is
+    supported by livekit, but we did not implement it since it was out of scope. Other complex key generation schemes
+    are also possible and can very easily be implemented.
 
     Currently, the matrix team has enabled e2ee, but they used a now old C++ implementation of Olm. They are now moving
     toward their new Rust implementation of it. It is not completely up to par, but the features we need are here. We
@@ -374,6 +419,11 @@
     which we will send and use to encrypt our sources. Since we need to initialize the matrix crypto library, we can
     very easily enable end-to-end encryption for other messages in Pubhubs. We have done some experiments with this,
     which we will discuss in a later chapter.
+
+    \section{Front end setup}
+    As mentioned before, the video conferencing client is completely separate from the rest of Pubhubs. This means that
+    the video conferencing solution can be easily enabled using a feature flag. This also means that the code is
+    written in a way such that it is isolated.
 
 % \newpage
 % \section{Research question}
