@@ -132,20 +132,20 @@
 
 
 \section{Video conferencing in PubHubs}
-It is safe to say that PubHubs has a lot of potential but is currently still looking for a suitable use case. We
-believe that having the ability to video call within PubHubs can be a great use case. This can be used for a lot of
-applications, like online consultations, online classes, or just to have a chat with friends. However, currently
-there are no organisations which are using PubHubs for this. So it is hard to say what the exact requirements are
-for video calling in PubHubs.
-We will have to make some assumptions and then validate these assumptions with the
-some testers\TODO{Maybe this would be useful}. We will also have to look at the current privacy
-considerations of PubHubs and see how we can implement video calling in a privacy-friendly way.
+Pubhubs is a platform which is currently still looking for a suitable use case. Altough there are many privacy
+enhacing features present in Pubhubs, many clients will not use it since it laking features which are required for
+their use case. We believe that having the ability to video call within PubHubs can be a very useful feature.
+This way the privacy friendly Pubhubs can be used for a lot of applications, like online consultations, online
+classes, or just to have a chat with friends. However, currently there are no organisations which are using PubHubs for this. So it is hard to say what the exact requirements are
+for video calling in PubHubs. We will make some requirements in terms of privacy, security and usability which we
+will be in line with the current PubHubs principles. We will then design a video conferencing solution and implement
+this design into a prototype. This prototype will be evaluated on the requirements we have set.
 
 
 \chapter{Background}
-We will make use of existing tools to build functionality in to Pubhubs. We will need to introduce some background
-information first.
-
+To understand the requirements and design we will first need to understand the current state of PubHubs and the
+different frameworks and technologies that we build our design on top of. We will also discuss what precisely we mean
+with video conferencing and what the different options are for video conferencing.
 
 \section{PubHubs}
 PubHubs, short for Public Hubs, is an alternative community platform that puts public values first
@@ -207,15 +207,20 @@ For example whether the user prefers a light or dark theme.
 
 
 \section{Video conferencing}
-During the COVID-19 pandemic, there was a big need for remote work. Immediately, services like Zoom \cite{Zoom}
-and Microsoft Teams  \cite{MSTeams}
-gained widespread adoption. These tools allowed video conferencing between different remote locations in real-time.
-These video call services might include end-to-end encryption but often lack authenticated video conferencing.
-Perhaps the need for authenticated video conferencing is not very apparent, and when calling friends it might not be
-needed. In contrast, when having an online consultation with your doctor, you want to be sure that you are actually
-calling a doctor.
+Video conferencing systems have been around since the 60s and 70s when NASA used it to communicate with astronauts
+on space flights. It has made its appearance in many science fiction works, where it seemed like a far-off future.
+However, in the last decade, video conferencing has become a standard tool for many businesses and individuals.
+Popularity increased dramatically during the COVID-19 pandemic, there was a big need for remote work. Immediately,
+services like Zoom \cite{Zoom} and Microsoft Teams  \cite{MSTeams} gained widespread adoption. These tools allowed
+video conferencing between different remote locations in real-time. However, these tools are not always
+privacy-friendly and are mostly setup for convenience and ease of use.
 
-% Misschien een sectie waar we vertellen dat je nu met AI heel veel dingen kan faken?
+These video call services might include end-to-end encryption but often lack authenticated video conferencing. On
+online platforms you can pretend to be anyone you want, it is even rather simple to digitally modify your voice or
+face. This has been done in the past by north korean hackers to infiltrate a US organization. Perhaps the need for
+authenticated video conferencing is not very apparent, and when calling friends it might not be needed. In contrast, when having an online consultation with your doctor, you
+want to be sure that you are actually calling a doctor. This is where authenticated video conferencing comes in.
+Authenticated video conferencing is a video call where you can verify that the person you are calling is who they say they are.
 
 If we look at video conferencing from a conceptual perspective, we see that there are multiple conferencing setups.
 For this research, we will distinguish three types. Person-to-person (one-on-one), Person-to-person (multiple people
@@ -233,56 +238,66 @@ we expect the users of Pubhubs to use video conferencing for, so we will focus o
 \end{figure}
 
 With video conferencing, people need to send and receive video streams, and we want to do this ideally in real time.
-A standard for that is WebRTC, and it is now widely supported in browsers (97.77\%) \cite{CIUIWEBRTC}
-. WebRTC is both a protocol and an API that can be used for many things, including video and audio communication.
-Matrix even has support for WebRTC and uses it in their main testing application Element \cite{ELEMENT}
-. In our implementation, we will use WebRTC to send video and audio streams. However, to which endpoints do we need
+A standard for that is WebRTC, and it is now widely supported in browsers (97.77\% of browser versions used) \cite{
+CIUIWEBRTC}. WebRTC is both a protocol and an API that can be used for many things, including video and audio communication.
+Matrix even has support for WebRTC and uses it in their main client Element \cite{ELEMENT}. In our
+implementation, we will use WebRTC to send video and audio streams. However, to which endpoints do we need
 to send these WebRTC streams?
 
 The first option is to send the data in a Peer-to-peer (P2P) network. This means that the people in the call send
 their stream to every other person in the call. This ensures that the server has no extra load since it does not
 handle any video streams, it simply facilitates the call setup. However, with every extra participant, every user
-needs to send/receive more and more data. At some point, a bottleneck is reached, and no extra participant can be
-added or a loss in data will occur. This is a very privacy-friendly method since the server has no access to the
-video conferencing data being sent and the users have full autonomy to choose who can receive their video data.
-However, due to the limited number of participants, this solution is not feasible.
+needs to send/receive more and more data. With every new user we need to use additional computational resources and at
+some point, a bottleneck is reached, and loss of data will occur. This is a very privacy-friendly method since the
+server has no access to the video conferencing data being sent and the users have full autonomy to choose who can
+receive their video data. However, due to the limited number of participants, this solution is not feasible.
 
-Another option would be to have a Multipoint Control Unit (MCU). An MCU takes in many media streams and combines
-them into one media stream. This makes it so that it can work very well with legacy systems, since an MCU can
-receive various types of media and then output a standardized output. For example, this would allow a participant to
-call in from a phone connection while the other participant have a video call. The MCU has to decode all the
-incoming media signals, which makes it costly at large scale, since the CPU usage would be very high. From a
-security and privacy perspective, this solution is not ideal, since the server has access to all the unencrypted
-video and audio data.
+Another option would be to have a Multipoint Control Unit (MCU). An MCU takes in many media streams, possibly
+converts it to another format and combines these streams into one media stream. This makes it so that it can work
+very well with legacy systems, since an MCU can receive various types of media and then output a standardized
+output. For example, this would allow a participant to call in from a phone connection while the other participant
+is using a desktop application. The MCU has to encode and decode all the incoming media signals, which makes it
+costly at large scale, since this is a computationally intensive task. From a security and privacy perspective, this
+solution is not ideal, since the server has access to all the unencrypted video and audio data which would mean that
+the server could potentially listen in on the call.
 
 Lastly, we have the Selective Forwarding Unit (SFU). An SFU behaves in a way like a switch where it would
 selectively forward streams between clients, it does not interact with the video streams so it would work similarly
 with encrypted and unencrypted data. From a user perspective, we only need to talk to one server, and we send and
-receive all our data through that server. An SFU provides a compelling balance of scalability and privacy. it needs
-lower resources since it only needs to forward the signals to the users and does not decrypt the data.
+receive all our data through that server. The server simply forwards and thus does not distinguish data coming from
+a user or another SFU, which in turn means that we can have multiple SFUs working together to relieve the load. This
+can increase the scalability of the system in terms of the number of participants or the quality of the streams when
+participants are geographically far apart. An SFU provides a compelling balance of scalability and privacy.
 
 
 \section{Matrix and Element call}
 As mentioned previously, Pubhubs is built upon Matrix. Matrix is an open-source network for secure, decentralized
 communication. It is built on an open standard, which means that anyone can build a client or server that is fully
 compatible with the Matrix protocol. User can even make proposals to change the protocol, which can then be voted on
-by the community. \TODO{Add ref to matrix spec but also extend this bit}
+by the community. This protocol is continuously changing depending on the use cases of their users. These changes
+are then implemented in the multiple implementations of the protocol. The most well-known implementation is Synapse,
+which is the reference implementation of the matrix protocol and is also used by Pubhubs.
 
-Matrix not only used in sending messages and
-multimedia between users, but it is fundamentally used to create and manage the rooms in Pubhubs. Thus, when
-creating the architecture and prototype, the matrix protocol should be considered as to not make choices which
-directly oppose the matrix standard.
+Pubhubs can be seen as a layer on top of matrix, which handles the identity management and adds some extra features.
+A hub will have to deploy a matrix server, in this case synapse, and their hub client. This also means that you can
+access hubs using any matrix client, with the downside that some features are not available in all clients, such as
+requesting attributes using Yivi. Matrix is the fundamental layer of Pubhubs, and it is important to keep in mind
+when designing and implementing new features. When designing the video conferencing solution, we will have to keep
+in mind the matrix protocol and only deviate from it when absolutely necessary.
 
-In proposal 3401 \cite{MATRIX_VIDEO_CALL_PROP}, functionality for video conferencing was proposed.
-This proposal can be applied to all the above-mentioned server setups and describes a protocol for video conferencing.
+It is important to note that when talking about matrix it sometimes refers to the protocol and sometimes to the
+reference implementation. In this research, we will mostly talk about the protocol and not the implementation. These
+should be the same but from time to time there are differences for instance when a new feature is in the protocol
+but not yet implemented in the reference implementation. We are mostly interested in proposal 3401 \cite{
+MATRIX_VIDEO_CALL_PROP}, since here matrix added functionality for video conferencing. This proposal
+can be applied to all the above-mentioned server setups and describes a protocol for video conferencing.
 
-The same team that built matrix is also building Element \cite{ELEMENT}
-, which is an open-source implementation of a messaging app that uses matrix. A new feature was added to Element
-called Element call, which serves as an example implementation of the proposal mentioned above. They started by
-using peer-to-peer video conferencing, since this more closely resembled the decentralized infrastructure of Matrix.
-However, this turned out to not be the best solution since it allowed for a maximum of 7 participants and video
-conferencing required numerous computer resources from participants. Recently, they have released a new version that
-makes use of an open-source SFU called Livekit \cite{LIVEKIT}.
+The same team that built matrix is also building Element \cite{ELEMENT}, which is an open-source matrix client.
+A new feature was added to Element called Element call, which serves as an example implementation of the proposal
+mentioned above. They started by using peer-to-peer video conferencing, since this more closely resembled the
+decentralized infrastructure of Matrix. However, this turned out to not be the best solution since it allowed for a
+maximum of 7 participants and video conferencing required numerous computer  resources from participants. Recently,
+they have released a new version that makes use of an open-source SFU called Livekit \cite{LIVEKIT}.
 
 We will use this implementation as a guide during our research; however, we will evaluate all the different choices
 made for Element call and deviate from them based on the requirements of PubHubs. When using Livekit we can easily
@@ -313,11 +328,8 @@ joined later.
 \subsection{Integrity}
 Integrity is the principle that information is protected from unauthorized modification. In the context of video
 conferencing, this means that the video and audio data should not be modified by unauthorized individuals, entities,
-or processes. This means that the video and audio data should be encrypted and that the encryption should be
-authenticated. \TODO{Check if this is the right term or that we have it}
-
-We also want to encrypt locally, meaning that the video and audio data should be encrypted on the client side. This
-means that the server does not have access to the video and audio data in an unencrypted form which can be modified.
+or processes. We can achieve this by having an authenticated encryption scheme, such that we can verify that the
+data is coming from the right participant and has not been tampered with.
 
 \subsection{Availability}
 Availability is the principle that information is available and accessible when needed by authorized individuals,
@@ -327,11 +339,11 @@ the video conferencing solution should not overload the server and should be abl
 more participants.
 
 
-\section{Code quality}
+\section{Code isolation}
 Pubhubs is a platform that is still in development and is constantly changing. This means that the video
-conferencing solution should be able to adapt to these changes. This means that the code should be written in such a way that it
-is easy to change and maintain. However, this should not come at the cost of flexibility. The video conferencing
-solution should be able to adapt to the different needs of the hubs.
+conferencing solution should be able to adapt to these changes. Pubhubs is also meant as a very configurable platform
+where hubs can enable or disable certain features. This means that the video conferencing solution should be able to
+be disabled without affecting the rest of Pubhubs.
 
 
 \todo{Andere manieren van user profile building}
@@ -339,10 +351,9 @@ solution should be able to adapt to the different needs of the hubs.
 
 
 \chapter{Proposed solution}
-
-\begin{figure}
+\begin{figure}[!hbt]
 \centering
-\includegraphics[width=\textwidth]{img/PH_videocall.excalidraw.png}
+\includegraphics[width=0.8\textwidth]{img/PH_videocall.excalidraw.png}
 \caption{Caption}
 \label{fig:video-conference-setup}
 \end{figure}
@@ -530,7 +541,12 @@ would impact the user experience by making it difficult to see which device is y
 
 \chapter{Future work}
 
+% speaker-to-audience
+% Different authentication methods
+
 \bibliographystyle{plain}
 \bibliography{references.bib}
+
+\printbibliography
 
 \end{document}
