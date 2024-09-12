@@ -155,7 +155,7 @@
     . In PubHubs all communication is done via Matrix. “Matrix is an open-source network for secure, decentralized
     communication” \cite{noauthor_matrixorg_nodate}.
 
-    Pubhubs uses a prvacy first design where attributes can be disclosed if the user so chooses. This approach we will
+    Pubhubs uses a privacy first design, where attributes can be disclosed if the user so chooses. This approach we will
     use in our design of the video conferencing feature.
 
 
@@ -288,32 +288,32 @@
     thus does not leak additional data.
 
     We have also set up a new route and web request handler on the hub server.
-    \texttt{GET /\_synapse/client/videocall} We use this endpoint ot authenticate the user and set up a video call
-    in livekit. For that we need to create a room and add the user to that room. We can add all sorts of checks to allow
-    a user to join a room,like checking if the user is in the room, if the room exists, if the user is allowed to
+    \texttt{GET /\_synapse/client/videocall} We use this endpoint to authenticate the user and set up a video call
+    in livekit. For that, we need to create a room and add the user to that room. We can add all sorts of checks to allow
+    a user to join a room, like checking if the user is in the room, if the room exists, if the user is allowed to
     join the room, etc. The requirements are not set in stone and can be changed to fit the needs of the hub server.
-    For now we check if the user is allowed to join the room and otherwise return a 403.
+    For now, we check if the user is allowed to join the room and otherwise return a 403.
 
-    The hub server authenticates the user by checking the pubhubs authentication token on the request. These tokens are
-    the same as when a user request any other data from the hub server. The response of this call will be an
+    The hub server authenticates the user by checking the Pubhubs authentication token on the request. These tokens are
+    the same as when a user requests any other data from the hub server. The response to this call will be an
     access token from livekit for this pseudonym and for this room. This token can then be used by livekit to
-    authenticate the user. Ideally we would not have another token which would in turn be used to authenticate the
-    user, however this allows us to have a separation between the hub server and the livekit server. This way we can
+    authenticate the user. Ideally, we would not have another token, which would in turn be used to authenticate the
+    user. However, this allows us to have a separation between the hub server and the livekit server. This way, we can
     even host the livekit server on a different server than the hub server. This is a good idea since the
-    livekit server will have a lot of high bandwidth traffic and we do not want to overload the hub server with
+    livekit server will have a lot of high bandwidth traffic, and we would rather not overload the hub server with
     this traffic, essentially denying service to other user because we have a large video call. The user then
     has the livekit token, which it will provide when sending and receiving data from the SFU. Non authenticated
     media will be rejected.
 
     \section{Video conferencing flow}
     Here we deviate somewhat from the original matrix specification. Since the spec also includes a protocol for
-    sharing which media devices are being used, we will not use this since livekit can handle this for us. Instead
+    sharing which media devices are being used, we will not use this, since livekit can handle this for us. Instead
     of sharing a lot of information about our setup and endpoints, we only need to know that a call has started and
-    if the call is encrypted we need to know the encryption keys of the participants. Livekit will provide us with
+    if the call is encrypted, we need to know the encryption keys of the participants. Livekit will provide us with
     an endpoint where we can send and receive our data, which in turn forwards it to the others in our room. We
     will thus only use the matrix protocol for setting up the room and sending the keys. This approach is also what
-    matrix intends to do moving forward, as they have speicified in a presentation \TODO{find presentation}. The
-    matrix team now support both solutions in their client sdk.
+    matrix intends to do moving forward, as they have specified in a presentation \todo{find presentation}. The
+    matrix team now support both solutions in their client SDK.
 
     \begin{figure}
         \centering
@@ -322,29 +322,29 @@
         \label{fig:video-conference-flow}
     \end{figure}
 
-    When Alice wants to start a call with Bob, she will sent a call event with an intent. This intent can be
+    When Alice wants to start a call with Bob, she will send a call event with an intent. This intent can be
     everything from having the room automatically join to ringing the other participants. We did not implement
-    these different behaviours since it was out of scope. After this her client will setup the video conferncing
-    screen, this is where she can choose her camera and microphone. When she is ready Alice will send her encyption
-    keys and will send to the others that she is a member of the call. She will then wait for any changes to the participants
-    if that happens she will update her keys and send them to the others.
+    these different behaviors since it was out of scope. After this, her client will set up the video conferencing
+    screen, this is where she can choose her camera and microphone. When she is ready Alice will send her encryption
+    keys and will send to the others that she is a member of the call. She will then wait for any changes to the participants,
+    if that happens, she will update her keys and send them to the others.
 
-    Bob will receive the call event and decides to join the call. His client will setup the video conferencing
-    screen where he can choose his camera and microphone. When he is ready Bob will send his encyption keys and will
-    send to the others that he is a member of the call. Since Alice can see that there is a new participant she will
-    update her keys and send them to Bob. Now they have all the keys of all the pariticpants and they can decrypt their
+    Bob will receive the call event and decides to join the call. His client will set up the video conferencing
+    screen where he can choose his camera and microphone. When he is ready, Bob will send his encryption keys and will
+    send to the others that he is a member of the call. Since Alice can see that there is a new participant, she will
+    update her keys and send them to Bob. Now they have all the keys of all the participants, and they can decrypt their
     video and audio streams.
 
     Alice sent her keys twice which is not strictly necessary, however using this we can have a simple code base
     without having to check if the keys are already sent. The setup of a call is now the same, regardless whether
     the call is new or already ongoing. This makes the code easier to understand and maintain.
 
-    Altough the keys are sent in the clear, they are only sent to the other participants in the call. This means that
-    only the participants in the call can decrypt the video and audio streams. Ideally we would send private
-    messages to the participants in the call, which is also possible within matrix. However this is not the default
+    Although the keys are sent in the clear, they are only sent to the other participants in the call. This means that
+    only the participants in the call can decrypt the video and audio streams. Ideally, we would send private
+    messages to the participants in the call, which is also possible within matrix. However, this is not the default
     currently since matrix is transitioning to a new end-to-end encryption library which is not yet fully implemented.
-    We have been in contact with the matrix team and they are working on this feature, so we decided to leave the code
-    as is and wait for the new implementation. This means that until we have the new implementation we do not have
+    We have been in contact with the matrix team, and they are working on this feature, so we decided to leave the code
+    as is and wait for the new implementation. This means that until we have the new implementation, we do not have
     full forward secrecy.
 
 
@@ -372,7 +372,7 @@
     toward their new Rust implementation of it. It is not completely up to par, but the features we need are here. We
     don't need much for the encryption of video calls, however, when we use the crypto library to create random keys
     which we will send and use to encrypt our sources. Since we need to initialize the matrix crypto library, we can
-    very easily enable end-to-end encryption for other messages in Pubhubs. We have done some experiments with this,
+    easily enable end-to-end encryption for other messages in Pubhubs. We have done some experiments with this,
     which we will discuss in a later chapter.
 
 % \newpage
