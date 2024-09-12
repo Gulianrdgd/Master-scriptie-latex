@@ -176,7 +176,7 @@ This local identity is created by multiplying the pseudonym with a hub specific
 This way the user can be anonymous within the hub, and even across hubs but whenever the
 \textit{PHC} and the \textit{TS} work together they can identify the user for instance when the user is misbehaving.
 
-Pubhubs uses a privacy first design where attributes can be disclosed if the user so chooses.
+Pubhubs uses a privacy first design, where attributes can be disclosed if the user so chooses.
 Hubs can have certain features only be accessed
 when certain attributes are disclosed. For example, a hub can require that a user has a certain age before they can
 enter a room. The hub can request these attribute using Yivi. The hub can then crypto graphically verify that the
@@ -438,12 +438,13 @@ matrix team now support both solutions in their client sdk.
 \end{figure}
 
 To understand the flow we will go through the flow of Alice starting a call with Bob.
-When Alice wants to start a call with Bob, she will sent a call event with an intent. This intent can be
+When Alice wants to start a call with Bob, she will send a call event with an intent. This intent can be
 everything from having the room automatically join to ringing the other participants. We did not implement
-these different behaviours since it was out of scope. After this her client will setup the video conferencing
+these different behaviors since it was out of scope. After this, her client will set up the video conferencing
 screen, this is where she can choose her camera and microphone. When she is ready Alice will send her encryption
 keys and will send to the others that she is a member of the call. She will then wait for any changes to the
-participants if that happens she will update her keys and send them to the others.
+participants,
+    if that happens, she will update her keys and send them to the others.
 
 Bob will receive the call event and decides to join the call. His client will setup the video conferencing
 screen where he can choose his camera and microphone. When he is ready Bob will send his encryption keys and will
