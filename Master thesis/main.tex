@@ -70,8 +70,8 @@
 \newcommand\thesissupervisorfirst{Bart Jacobs}
 \newcommand\thesissupervisorsecond{Omar Javed}
 \newcommand\thesissecondreaderfirst{TBA}
-\newcommand\thesissecondreadersecond{}
-\newcommand\thesisdate{May 2023}
+\newcommand\thesissecondreadersecond{Bram Westerbaan}
+\newcommand\thesisdate{Febrauri 2024}
 
 
 %% FOR PDF METADATA
@@ -80,6 +80,8 @@
 \date{\thesisdate}
 
 %%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{references}
 
 \begin{document}
 \begin{titlepage}
@@ -209,9 +211,9 @@ Video conferencing systems have been around since the 60s and 70s, when NASA use
 on space flights. It has made its appearance in many science fiction works, where it seems like a far-off future.
 However, in the last decade, video conferencing has become a standard tool for many businesses and individuals.
 Popularity increased dramatically during the COVID-19 pandemic, there was a big need for remote work. Immediately,
-services like Zoom \cite{Zoom} and Microsoft Teams  \cite{MSTeams} gained widespread adoption. These tools allowed
-video conferencing between different remote locations in real-time. However, these tools are not always
-privacy-friendly and are mostly set up for convenience and ease of use.
+services like Zoom \cite{noauthor_one_nodate} and Microsoft Teams  \cite{noauthor_microsoft_nodate} gained
+widespread adoption. These tools allowed video conferencing between different remote locations in real-time.
+However, these tools are not always privacy-friendly and are mostly set up for convenience and ease of use.
 
 These video call services might include end-to-end encryption but often lack authenticated video conferencing. On
 online platforms you can pretend to be anyone you want, it is even rather simple to digitally modify your voice or
@@ -237,8 +239,8 @@ we expect the users of Pubhubs to use video conferencing for, so we will focus o
 
 With video conferencing, people need to send and receive video streams, and we want to do this ideally in real time.
 A standard for that is WebRTC, and it is now widely supported in browsers (97.77\% of browser versions used) \cite{
-CIUIWEBRTC}. WebRTC is both a protocol and an API that can be used for many things, including video and audio communication.
-Matrix even has support for WebRTC and uses it in their main client Element \cite{ELEMENT}. In our
+noauthor_webrtc_nodate}. WebRTC is both a protocol and an API that can be used for many things, including video and audio communication.
+Matrix even has support for WebRTC and uses it in their main client Element \cite{noauthor_element_nodate}. In our
 implementation, we will use WebRTC to send video and audio streams. However, to which endpoints do we need
 to send these WebRTC streams?
 
@@ -286,15 +288,15 @@ It is important to note that when talking about Matrix, it sometimes refers to t
 reference implementation. In this research, we will mostly talk about the protocol and not the implementation. These
 should be the same, but from time to time, there are differences. For instance, when a new feature is in the protocol
 but not yet implemented in the reference implementation. We are mostly interested in proposal 3401 \cite{
-MATRIX_VIDEO_CALL_PROP}, since here matrix added functionality for video conferencing. This proposal
+noauthor_matrix-spec-proposalsproposals3401-group-voipmd_nodate}, since here matrix added functionality for video conferencing. This proposal
 can be applied to all the above-mentioned server setups and describes a protocol for video conferencing.
 
-The same team that built matrix is also building Element \cite{ELEMENT}, which is an open-source matrix client.
+The same team that built matrix is also building Element \cite{noauthor_element_nodate}, which is an open-source matrix client.
 A new feature was added to Element called Element call, which serves as an example implementation of the proposal
 mentioned above. They started by using peer-to-peer video conferencing, since this more closely resembled the
 decentralized infrastructure of Matrix. However, this turned out to not be the best solution since it allowed for a
 maximum of 7 participants and video conferencing required numerous computer  resources from participants. Recently,
-they have released a new version that makes use of an open-source SFU called Livekit \cite{LIVEKIT}.
+they have released a new version that makes use of an open-source SFU called Livekit \cite{noauthor_livekit_nodate}.
 
 We will use this implementation as a guide during our research; however, we will evaluate all the different choices
 made for Element call and deviate from them based on the requirements of PubHubs. When using Livekit we can easily
@@ -425,7 +427,7 @@ us. We only need to know that a call has started in a room and the encryption ke
 provide us with an endpoint where we can send and receive our data, which in turn forwards it to the others in our room.
 
 We will thus only use the matrix protocol for setting up the room and sending the keys. This approach is also what
-matrix intends to do moving forward, as they have specified in a presentation \TODO{Add presentation to Zotero}. The
+matrix intends to do moving forward, as they have specified in a presentation \cite{nirve_matrixrtc_nodate}. The
 matrix team now support both solutions in their client SDK.
 
 \begin{figure}
@@ -462,11 +464,11 @@ process. The worker uses the Web Crypto API, which is a widely used and tested A
 These APIs are now common in all modern browsers, so we can be sure that the encryption and decryption will work on
 all devices.
 
-Livekit uses Advanced Encryption Standard cipher in Galois/Counter Mode (AES-GCM), to encrypt and authenticate the
-frames. This is a widely used and researched block cipher, which is even used by Netflix
-%\TODO{Add ref, is in Zotero}
-). It is also very fast and efficient, even working well on slower devices. The key is derived from the key that is
-sent by the participants in the call. This key is then used to decrypt the video and audio frames from the other
+Livekit uses Advanced Encryption Standard cipher in Galois/Counter Mode (AES-GCM)\cite{daemen_rijndael_nodate}\cite{
+mcgrew_galoiscounter_nodate}, to encrypt and authenticate the frames. This is a widely used and researched block
+cipher, which is even used by Netflix \cite{blog_protecting_2017}). It is also very fast and efficient, even
+working well on slower devices. The key is derived from the key that is sent by the participants in the call. This
+key is then used to decrypt the video and audio frames from the other
 participants.
 
 %\TODO{UItbreiden en aan elkaar plakken}
@@ -551,13 +553,15 @@ would impact the user experience by making it difficult to see which device is y
 
 
 \chapter{Future work}
-
+\section{Speaker-to-audience}
+As mentioned previously, we have three types of video conferencing. We have only implemented the one-on-one type and
+the group type. However there might still be a need for speaker-to-audience type of video conferencing, for instance
+when a hub is owned by a municipality and they want to give a speech. This type of video conferencing has different
+requirements and the current video conferencing setup would be inefficient.
 % speaker-to-audience
 % Different authentication methods
 
-\bibliographystyle{plain}
-\bibliography{references.bib}
+\newpage
 
-\printbibliography
 
 \end{document}
