@@ -63,7 +63,7 @@
 %             ||               %
 %             \/               %
 
-\newcommand{\thesistitle}{Integrating secure authenticated video calling into Pubhubs}
+\newcommand{\thesistitle}{Integrating secure authenticated video calling into PubHubs}
 \newcommand{\thesissubtitle}{A design and the need for authenticated video calling}
 \newcommand\thesisauthorfirst{Julian van der Horst \\ s1015357}
 \newcommand\thesisauthorsecond{}
@@ -129,8 +129,8 @@
 
 
 \chapter{Introduction}
-Pubhubs is a platform which is currently still looking for a suitable use case. Although there are many privacy enhancing features present in Pubhubs, many clients will not use it since it lacks features which are required for their use case. We believe that having the ability to video call within PubHubs can be a very useful feature, which for some clients is a necessity. 
-This way, the privacy-friendly Pubhubs can be used for numerous applications, like online consultations, online
+PubHubs is a platform which is currently still looking for a suitable use case. Although there are many privacy enhancing features present in PubHubs, many clients will not use it since it lacks features which are required for their use case. We believe that having the ability to video call within PubHubs can be a very useful feature, which for some clients is a necessity.
+This way, the privacy-friendly PubHubs can be used for numerous applications, like online consultations, online
 classes, or just to have a chat with friends. However, currently there are no organizations which are using PubHubs for this. So it is hard to say what the exact requirements are
 for video calling in PubHubs. We will make some requirements in terms of privacy, security, and usability which we
 will be in line with the current PubHubs principles. We will then design a video conferencing solution and implement
@@ -147,30 +147,28 @@ conferencing.
 \section{PubHubs}
 PubHubs, short for Public Hubs, is an alternative community platform that puts public values first
 \cite{jacobs_pubhubs_2023}. Unlike mainstream social media platforms like Instagram or Twitter that focus on
-individual broadcasting, PubHubs emulates real-world social dynamics by centering interactions within smaller,
+individual broadcasting, PubHubs emulates offline social dynamics by centering interactions within smaller,
 community-based hubs. The reasoning
-behind that is that this behavior closely resembles normal human interaction, where humans have small groups of
-friends and collaborators with whom they interact. The way people experience social media now is very unnatural,
-where if they engage with a platform, their posts are broadcasted into the whole world and are for everyone to see.
+behind that is that this behavior closely resembles offline human interaction, where humans have small groups of
+friends and collaborators with whom they interact. Social media now is very unnatural, where if people engage with a
+platform, their posts are broadcasted into the whole world and are for everyone to see.
 
 “PubHubs is organized as a network of independent hubs, with a shared single-sign-on. Conversations take place in
 local hubs (and not globally) and the associated (conversation) data is managed decentrally, within each hub”~
-\cite{jacobs_pubhubs_2023}
-. Privacy is one of the core values of PubHubs, which can be seen in how it handles identity management. The main
-idea of Pubhubs is to allow pseudonymity while maintaining both accountability and the ability to verify certain
-attributes of the user.
+\cite{jacobs_pubhubs_2023}. The main idea of PubHubs is to allow pseudonymity while maintaining both accountability
+and the ability to verify certain attributes of the user. Privacy is one of the core values of PubHubs, which can be
+seen in how it handles identity management.
 
-Pubhubs consists of a central server(Pubhubs central or \textit{PHC}), the Transcriptor (\textit{TS}) and multiple hubs.
-When a user registers, they register at Pubhubs central using Yivi (formerly IRMA)\cite{alpar_irma_nodate} by disclosing
+PubHubs consists of a central server(PubHubs central or \textit{PHC}), the Transcryptor (\textit{TS}) and multiple
+hubs.
+When a user registers, they register at PubHubs central using Yivi (formerly IRMA)\cite{alpar_irma_nodate} by disclosing
 certain attributes. When the attributes are verified the user is assigned a global identity by \textit{PHC}.
-This global identity is an (Elgamal) encryption of the user identity, which no single entity within Pubhubs
-can decrypt, but if the \textit{PHC} and the \textit{TS} work together they can.
-In each hub, the user will have a local identity, which is derived from the pseudonym.
-This local identity is created by multiplying the pseudonym with a hub specific
-'psuedonymization' factor, which is only known by the
-\textit{TS}. This is set up in such a way that \textit{PHC} does not learn to which hub the user is going, while
-\textit{TS} does not learn who is visiting the hub.
-This way the user can be anonymous within the hub, and even across hubs, but whenever the
+This global identity (pseudonym) is an Elgamal encryption of the user identity, which no single entity within PubHubs
+can decrypt, but if the \textit{PHC} and the \textit{TS} work together they can. In each hub, the user will have a
+local identity, which is derived from the global pseudonym. This local identity is created by multiplying the
+global pseudonym with a hub specific 'psuedonymization' factor, which is only known by the \textit{TS}. This is set
+up in such a way that \textit{PHC} does not learn to which hub the user is going, while \textit{TS} does not learn
+who is visiting the hub. This way the user can be anonymous within the hub, and even across hubs, but whenever the
 \textit{PHC} and the \textit{TS} work together they can identify the user, for instance when the user is misbehaving.
 
 In PubHubs all communication is done via Matrix. Matrix is an open-source network for secure, decentralized
@@ -178,21 +176,21 @@ communication \cite{noauthor_matrixorg_nodate}, which will be explained in \auto
 layer on top of Matrix, which handles the identity management and adds some extra features like the ability to have
 secured rooms.
 
-Secured rooms are rooms which a user can only enter if a attribute is disclosed. For example, a hub can require
+Secured rooms are rooms which a user can only enter if an attribute is disclosed. For example, a hub can require
 that a user has a certain age before they can enter a room. The hub can request these attributes using Yivi. The hub
 can then cryptographically verify that the user has the attribute without knowing the actual
 value of the attribute. This way, the user can prove that they have the attribute without disclosing the actual
 value of the attribute. Staying with the example of age, the hub can verify that the user is over 18 without knowing
-the actual age of the user. This is a very powerful feature of Pubhubs, which can be used for many different use cases.
+the actual age of the user. This is a very powerful feature of PubHubs, which can be used for many different use cases.
 
-In Pubhubs the hubs are run by different organizations which typically have a public function, such as
+In PubHubs the hubs are run by different organizations which typically have a public function, such as
 local governments, schools, libraries or hospitals.
 These hubs can have different rules or have different features.
-To allow this, Pubhubs has a strong divide between Pubhubs central and the different hubs.
+To allow this, PubHubs has a strong divide between PubHubs central and the different hubs.
 This division is even made in the client, where there is a distinction of the global client and the hub client.
 
 The global client enables a user to go from hub to hub and log in, it is
-the interface that you see when you visit the Pubhubs website.
+the interface that you see when you visit the PubHubs website.
 Once you enter a hub, the global client loads the hub client in an Iframe. The hub client
 is the client that the hub itself deploys. Here, the hubs have full control
 over the client. They can control the layout, the features, and the look and feel of the client.
@@ -213,26 +211,29 @@ widespread adoption. These tools allowed video conferencing between different re
 However, these tools are not always privacy-friendly and are mostly set up for convenience and ease of use \cite{Gauthier_Husain_2021}.
 
 These video call services might include end-to-end encryption, most do not \cite{Gauthier_Husain_2021}, but often lack authenticated video
-conferencing. On
-online platforms you can pretend to be anyone you want, it is even rather simple to digitally modify your voice or
-face. This has been done in the past by North Korean hackers to infiltrate a US organization \cite{
-noauthor_how_nodate}. Perhaps the need for authenticated video conferencing is not very apparent, and when calling
-friends it might not be needed. In contrast, when having an online consultation with your doctor, you
-want to be sure that you are actually calling a doctor. This is where authenticated video conferencing comes in.
-Authenticated video conferencing is a video call where you can verify that the person you are calling is who they say they are.
+conferencing. Authenticated video conferencing is a video call where you can verify that the person you are calling is who they say they are.
+On online platforms you can pretend to be anyone you want, it is even rather simple to digitally
+modify your voice or face. This has been done in the past by North Korean hackers to infiltrate a US organization \cite{
+noauthor_how_nodate}. Perhaps the need for authenticated video conferencing is not very apparent. When we consider
+the situation of an online consultation with your doctor, you want to be sure that you are actually calling a doctor. This is
+where authenticated video conferencing comes in.
 
 If we look at video conferencing from a conceptual perspective, we see that there are multiple conferencing setups.
-For this research, we will distinguish three types:
+For this research, we will distinguish three types. These types will most likely be different types of video
+conferencing that will occur on the Pubhubs platform. We distinguish these types because
+they all have certain properties that yield different requirements for the video conferencing solution. The three
+types are:
+
 \begin{itemize}
     \item Person-to-person (one-on-one)
     \item Person-to-person (multiple people)
     \item Speaker-to-audience
 \end{itemize}
-We distinguish these types because they all have certain properties that best match with
-different technologies. Where in one-on-one we only need to send and receive to one other person, when we are in a
+
+Where in one-on-one we only need to send and receive data to one other person, when we are in a
 group we need to send and receive data to each member in a call. On the contrary, with speaker-to-audience, we do
 not have connections between the individual audience members. The first and second setup are more in line with what
-we expect the users of Pubhubs to use video conferencing for, so we will focus on them in this research.
+we expect the users of PubHubs to use video conferencing for, so we will focus on them in this research.
 
 \begin{figure}[!hbt]
 \centering
@@ -244,37 +245,46 @@ we expect the users of Pubhubs to use video conferencing for, so we will focus o
 With video conferencing, people need to send and receive video streams, and we want to do this ideally in real time.
 A standard for that is WebRTC, and it is now widely supported in browsers (97.77\% of browser versions used) \cite{
 noauthor_webrtc_nodate}. WebRTC is both a protocol and an API that can be used for many things, including video and audio communication.
-Matrix even has support for WebRTC and uses it in their main client Element \cite{noauthor_element_nodate}. In our
-implementation, we will use WebRTC to send video and audio streams. However, to which endpoints do we need
-to send these WebRTC streams?
+Matrix even has support for WebRTC and uses it in their client Element \cite{noauthor_element_nodate}. In our
+implementation, we will use WebRTC to send video and audio streams. These streams eventually need to arrive at
+the other participants in the call, however it can take many different paths to get there depending on the setup of
+the network.
 
-The first option is to send the data in a Peer-to-peer (P2P) network. This means that the people in the call send
-their stream to every other person in the call. This ensures that the server has no extra load since it does not
-handle any video streams, it simply facilitates the call setup. However, with every extra participant, every user
-needs to send/receive more and more data. With every new user, we need to use additional computational resources and at
-some point, a bottleneck is reached, and loss of data will occur. This is a very privacy-friendly method since the
-server has no access to the video conferencing data being sent and the users have full autonomy to choose who can
-receive their video data. However, due to the limited number of participants, this solution is not feasible.
+The first option is to send the video and audio streams peer-to-peer (P2P). This means that the people in
+the call send their stream to every other person in the call. This option does not need a server to manage or
+distribute the audio and video stream, ensuring that the hub server has no extra load. The hub server simply
+facilitates the call setup. However, with every extra participant, every user needs to send/receive more and more
+data. With every new user, every client needs to use more resources and at some point, a bottleneck is
+reached, and loss of data will occur. This is a very privacy-friendly method since the server has no access to the
+video conferencing data being sent and the users have full autonomy to choose who can receive their video data.
+However, due to the limited number of participants, this solution is not feasible.
 
 Another option would be to have a Multipoint Control Unit (MCU). An MCU takes in many media streams, possibly
 converts it to another format, and combines these streams into one media stream. This makes it so that it can work
 very well with legacy systems, since an MCU can receive various types of media and then output a standardized
 output. For example, this would allow a participant to call in from a phone connection while the other participant
 is using a desktop application. The MCU has to encode and decode all the incoming media signals, which makes it
-costly at large scale, since this is a computationally intensive task. From a security and privacy perspective, this
-solution is not ideal, since the server has access to all the unencrypted video and audio data, which would mean that
-the server could potentially listen in on the call.
+costly for the hub at large scale, since this is a computationally intensive task. From a security and privacy
+perspective, this solution is not ideal, since the server has access to all the unencrypted video and audio data,
+which would mean that the server could potentially listen in or even impersonate someone on the call.
 
-Lastly, we have the Selective Forwarding Unit (SFU). An SFU behaves in a way like a switch where it would
-selectively forward streams between clients, it does not interact with the video streams so it would work similarly
-with encrypted and unencrypted data. From a user perspective, we only need to talk to one server, and we send and
-receive all our data through that server. The server simply forwards and thus does not distinguish data coming from
-a user or another SFU, which in turn means that we can have multiple SFUs working together to relieve the load. This
-can increase the scalability of the system in terms of the number of participants or the quality of the streams when
+Lastly, we have an architecture with a Selective Forwarding Unit (SFU). An SFU behaves in a way like a switch where it
+would selectively forward streams between clients, it does not interact with the video streams so it would work
+similarly with encrypted and unencrypted data. From a user perspective, we only need to talk to one server, and we
+send and receive all our data through that server. The server simply forwards and thus does not distinguish data
+coming from a user or another SFU, which in turn means that we can have multiple SFUs working together to relieve
+the load. This can increase the scalability of the system in terms of the number of participants or the quality of the streams when
 participants are geographically far apart. An SFU provides a compelling balance of scalability and privacy, which is
 why we will use this in our implementation.
 
-Pubhubs for now is only a web based app and we will only focus on the web based video conferencing solutions. This means
+\begin{figure}[!hbt]
+\centering
+\includegraphics[width=0.7\textwidth]{img/thesisDPD}
+\caption{The three options.}
+\label{fig:three-options-video-conferencing}
+\end{figure}
+
+PubHubs for now is only a web based app and we will only focus on the web based video conferencing solutions. This means
 that we do not need the legacy support that an MCU provides. We also do not want to have the server have access to the
 video and audio data. This leaves us with the SFU and P2P. Since we want to have a scalable solution, we will use the SFU.
 Perhaps to save on server bandwidth and to have a more privacy-friendly solution, we can use a P2P network for one-on-one
@@ -282,17 +292,17 @@ conferencing. This is something we will look into in future work.
 
 \section{Matrix and Element call}
 \label{sec:matrix}
-As mentioned previously, Pubhubs is built upon Matrix. Matrix is an open-source network for secure, decentralized
+As mentioned previously, PubHubs is built upon Matrix. Matrix is an open-source network for secure, decentralized
 communication. It is built on an open standard, which means that anyone can build a client or server that is fully
 compatible with the Matrix protocol. User can even make proposals to change the protocol, which can then be voted on
 by the community. This protocol is continuously changing depending on the use cases of their users. These changes
 are then implemented in the multiple implementations of the protocol. The most well-known implementation is Synapse,
-which is the reference implementation of the matrix protocol and is also used by Pubhubs.
+which is the reference implementation of the matrix protocol and is also used by PubHubs.
 
-Pubhubs can be considered a layer on top of matrix, which handles the identity management and adds some extra features.
-A hub will have to deploy a matrix server, in this case synapse, and their hub client. This also means that you can
+PubHubs can be considered a layer on top of matrix, which handles the identity management and adds some extra features.
+A hub will have to deploy a matrix homeserver, in this case synapse, and their hub client. This also means that you can
 access hubs using any matrix client, with the downside that some features are not available in all clients, such as
-requesting attributes using Yivi. Matrix is the fundamental layer of Pubhubs, and it is important to keep in mind
+requesting attributes using Yivi. Matrix is the fundamental layer of PubHubs, and it is important to keep in mind
 when designing and implementing new features. When designing the video conferencing solution, we will have to keep
 in mind the matrix protocol and only deviate from it when absolutely necessary.
 
@@ -314,7 +324,7 @@ We will use this implementation as a guide during our research; however, we will
 made for Element call and deviate from them based on the requirements of PubHubs. When using Livekit we can easily
 implement features like noise suppression or video simulcast (Sending multiple video streams with different
 qualities, to dynamically choose the quality according to a user's internet connection). On the other hand it
-also makes Pubhubs dependent on Livekit, which is a third-party service.
+also makes PubHubs dependent on Livekit, which is a third-party service.
 
 
 \chapter{Requirements}
@@ -333,7 +343,7 @@ the video and audio data.
 
 This end-to-end encryption should be fast and secure since the data is sent in real-time. If the encryption and
 decryption are computationally expensive, the latency will increase, which will result in a poor user experience. We
-also do not want huge system requirements for the clients, since Pubhubs should be accessible to everyone.
+also do not want huge system requirements for the clients, since PubHubs should be accessible to everyone.
 
 Some conversations might be sensitive, so we want to make sure that only the users currently in the call can
 decrypt the video and audio data. We do not want new users to be able to decrypt the video and audio data from
@@ -349,14 +359,14 @@ right participant and has not been tampered with.
 
 \section{Availability}
 Availability is the principle that information is available and accessible when needed by authorized individuals,
-entities, or processes. In the context of Pubhubs, this means that the video conferencing solution should be able to
-handle a large number of participants without compromising the functionality of the rest of Pubhubs. This means that
+entities, or processes. In the context of PubHubs, this means that the video conferencing solution should be able to
+handle a large number of participants without compromising the functionality of the rest of PubHubs. This means that
 the video conferencing solution should not overload the server and should be able to scale horizontally to handle
 more participants.
 
 \section{Authentication}
 Authentication is the principle that the identity of a user can be verified. In the context of video conferencing,
-this means that we should be able to verify that the person we are calling is who they say they are. In Pubhubs, we
+this means that we should be able to verify that the person we are calling is who they say they are. In PubHubs, we
 only have a pseudonym, which is a local identity. For some use cases this might be fine, however for some use cases
 such as online consultations, we want to be sure that we are actually calling a doctor.
 
@@ -369,11 +379,11 @@ disclose their name. We use Yivi to request and verify these attributes.
 \todo{Usability but not sure if this is implicit?}
 
 \section{Code isolation}
-Pubhubs is a platform that is still in development and is constantly changing. This means that the video
-conferencing solution should be able to adapt to these changes. Pubhubs is also meant as a very configurable platform
+PubHubs is a platform that is still in development and is constantly changing. This means that the video
+conferencing solution should be able to adapt to these changes. PubHubs is also meant as a very configurable platform
 where hubs can enable or disable certain features. This means that the video conferencing solution should be able to
-be disabled without affecting the rest of Pubhubs. We can achieve this by having the video conferencing solution
-completely isolated from the rest of Pubhubs. This means that we will need to have separate data instead of
+be disabled without affecting the rest of PubHubs. We can achieve this by having the video conferencing solution
+completely isolated from the rest of PubHubs. This means that we will need to have separate data instead of
 extending the currently used data store. Similarly, we will need to have separate endpoints which the video
 conferencing solution will use, instead of extending the current endpoints.
 
@@ -396,12 +406,12 @@ between the different clients. This server will not see the video conferencing d
 encrypted and the server does not have access to the keys. The only thing that the livekit server sees is the local
 pseudonym of the user, which the hub server already knows and thus does not leak additional data.
 
-We chose Livekit since it is open-source and can be easily integrated with Pubhubs, since the server is written in
+We chose Livekit since it is open-source and can be easily integrated with PubHubs, since the server is written in
 Python. Livekit is also used by Element call, which we used as a reference implementation during development. We
 also get some additional features like noise suppression and video simulcast, without having to implement them
 ourselves. Furthermore, Livekit is simple to configure, can scale very well and can be easily deployed with docker.
 
-Livekit still needs to authenticate the users, it uses a token for this which is seperate from the pubhubs
+Livekit still needs to authenticate the users, it uses a token for this which is seperate from the PubHubs
 authentication token. This token is generated by the livekit server but can only be requested by the hub server.
 For this we have set up a new endpoint on the hub server such that the user can request a livekit token. The flow is
 as follows: The user requests a livekit token from the hub server, the server authenticates the user and checks if
@@ -415,12 +425,12 @@ future since we do the authentication in the hub server in a similar way to the 
 inclusion of these attributes out of scope since you can have a similar result by only allowing video conferencing in
 secured rooms (which have the required attributes).
 
-The hub server authenticates the user by checking the Pubhubs authentication token on the request. These tokens are
+The hub server authenticates the user by checking the PubHubs authentication token on the request. These tokens are
 the same as when a user requests any other data from the hub server. The response to this call will be an
 access token from livekit for this pseudonym and for this room. This token is used when sending and receiving data
 from the livekit server, non-authenticated media will be rejected. This token is only valid for the room and the
 pseudonym, so the user cannot use this token to join another room or use another pseudonym. Ideally, we would not
-have another token besides the Pubhubs token. However, this allows us to have a separation between the hub server
+have another token besides the PubHubs token. However, this allows us to have a separation between the hub server
 and the livekit server. This way, we can even host the livekit server on a physically different server than the hub
 server.
 
@@ -515,12 +525,12 @@ as is and wait for the new implementation. This means that until we have the new
 full forward secrecy.
 
 Since we need to initialize the matrix crypto library for the encryption, we can very easily enable end-to-end
-encryption for other messages in Pubhubs. We have done some experiments with this, which we will discuss in future
+encryption for other messages in PubHubs. We have done some experiments with this, which we will discuss in future
 work.
 
 
 \section{Front end setup}
-As mentioned before, the video conferencing client is completely separate from the rest of Pubhubs. This means that
+As mentioned before, the video conferencing client is completely separate from the rest of PubHubs. This means that
 the video conferencing solution can be easily enabled using a feature flag. This also means that the code is
 written in a way such that it is isolated.
 
@@ -543,12 +553,12 @@ would impact the user experience by making it difficult to see which device is y
 %     sub-questions. We will divide these up into three different categories.
 
 % \textbf{Privacy}
-% For Pubhubs privacy is one of their core values and during the creation and development of Pubhubs certain
+% For PubHubs privacy is one of their core values and during the creation and development of PubHubs certain
 %     decisions have been made regarding privacy. These decision should be considered and can be formulated into
 %     these sub-questions:
 
 % — What information or metadata should we allow leaking to achieve authenticated video conferencing, regarding the
-%     current Pubhubs privacy principles?
+%     current PubHubs privacy principles?
 
 % — How can we balance essential call features, like visible call status, with a commitment to user privacy?
 
@@ -557,17 +567,17 @@ would impact the user experience by making it difficult to see which device is y
 %     data encryption. This requires an encryption scheme which is user-friendly, has low computational overhead, and
 %     still has appropriate security.
 
-% — What encryption scheme is best suited for authenticated video conferencing in Pubhubs, weighing user experience
+% — What encryption scheme is best suited for authenticated video conferencing in PubHubs, weighing user experience
 %     and computational overhead while ensuring optimal security?
 
 % \textbf{Development}
 % While doing the research and writing the code for it, we should also keep in mind the current development setup for
 %     PubHubs. This means that we should keep in mind which technologies they are using now and remain in those
-%     ecosystems. This makes it so that the code can be more easily maintained in the future. Pubhubs allows hubs to
+%     ecosystems. This makes it so that the code can be more easily maintained in the future. PubHubs allows hubs to
 %     create their own version of the hub client, which should be considered when creating the video conferencing
 %     client.
 
-% — How can we develop a video conferencing prototype within the existing Pubhubs ecosystem, while simultaneously
+% — How can we develop a video conferencing prototype within the existing PubHubs ecosystem, while simultaneously
 %     considering different hub client implementations?
 
 
