@@ -627,49 +627,90 @@ PubHubs while maintaining the platform's core principles of privacy, security, a
 evaluate how well the solution meets the established requirements and analyze the key design decisions made during
 implementation.
 
-\section{Meeting Core Requirements}
-In this thesis we have set some core requirements. The first requirements where the CIA triad, which stands for
-Confidentiality, Integrity, and Availability. We have achieved confidentiality by using end-to-end encryption
-end-to-end encryption of video and audio streams using the AES-GCM encryption standard through Livekit's e2ee worker.
-This ensures that even the SFU server cannot access the unencrypted content of calls. However, the current key
-distribution mechanism, which relies on sending keys as clear-text Matrix room messages, prevents us for having a
-perfect forward secrecy. While this is a temporary constraint due to Matrix's transitioning encryption library, it
-represents a compromise in the current implementation. Albeit not a critical issue since it still requires you to
-be in the room where the call occurs, it is a potential area for future improvement.
+\section{Confidentiality}
+The implementation achieves confidentiality through end-to-end encryption of video and audio streams using local
+AES-GCM encryption. This ensures that the video conferencing content remains private, with only authorized
+participants able to access the unencrypted streams. The SFU server, while handling the routing of encrypted
+packets, cannot access the actual content of the calls since it does not have access to the keys. However, the current
+key distribution mechanism represents a compromise in the implementation. Keys are sent as
+clear-text Matrix room messages, which has two implications.
 
-The solution also maintains data integrity through authenticated encryption, ensuring that streams cannot be tampered
-with during transit. Since we use an SFU architecture together with end-to-end encryption, the server cannot modify
-the encrypted content. This achieves the goal of protecting against "honest but curious" servers, since all the keys
-are only available to the clients. However there is currently one tradeoff, the hub server knows the livekit token
-of the user. This hub server could potentially use this token to join the call. This would be a problem if the hub
-server is compromised, however the hub server would not receive the encryption keys and thus would not be able to
-encrypt and decrypt the video data.
-\todo{Is this really the case? Does authenticated encryption ensure integrity?}
+Firstly, the hub server can theoretically access these
+keys. However the hub server does not have access to the video and audio data, so for this to be a problem the hub
+server would have to coalesce with the livekit server. This is a serious tradeoff, but currently there is no end-to-end
+encryption of regular messages in PubHubs. So the hub server can already see the messages of the users. It does protect
+the video and audio data from being intercepted or leaked during transit. Secondly, the lack of perfect forward
+secrecy means that users who join a call late can decrypt the video and audio data from before they joined. They would
+still have to collect the encrypted data, which is not trivial.
 
-Availability is another benefit of using an SFU architecture. The ability to deploy Livekit on separate servers and
-scale horizontally means that the solution can handle a large number of participants without compromising the
-functionality of the rest of PubHubs. This is however up to the hub to decide and configure, which should be made very
-clear to the hub administrators. The hub administrators should calculate what an acceptable number of participants is
-and how much resources they are willing to allocate to the video conferencing solution. Currently this is a rather technical
-process, which could be made easier in the future by providing some guidelines or even an automatic scaling solution.
+These limitations stem from Matrix's transitioning encryption library which does not yet support end-to-end
+encryption of direct messages. This is a temporary constraint and once they have implemented that, the
+aforementioned implications should resolve itself.It does also not leak any more information than the hub server
+already knows, and there is a tradeoff which should be considered but is not a critical issue.
 
-\todo{Dit hoofdstuk iets anders aanpakken}
-When it comes to authentication, the solution uses the same authentication mechanism as the rest of PubHubs. A user would
-need to authenticate with the hub server before they receive a token for the livekit server. Currently we only check if
-the user is allowed to join the room, however we can also require the user to disclose certain YIVI attributes. However we
-argue that this is not necessary since you can have a similar result by only allowing video conferencing in secured rooms.
-You would then set up these secured rooms in such a way that the users have to disclose certain attributes. We believe that
-this is fine in most cases, since it would not make sense to have a group call in a public room where you want to ensure that the
-participants have certain attributes.
+\section{Integrity}
+The video conferencing solution maintains data integrity because of the use of AES-GCM encryption. Which allows you
+to verify the integrity and authentication of additional authenticated data (AAD). Whn it comes to authentication
+integrity we do have a limitation, namely that the hub server knows the Livekit token of each user. While this could
+theoretically allow a compromised hub server to join calls and pretend to be a user. The hub server cannot listen in
+on the video and audio data, since it does not have access to the encryption keys.
 
-When it comes to who knows what, the server knows that a call is started and who is in the call. It actaully does not
-keep track of who is in the call, but it can see who requested to join the video call. The server does not know the
-encryption keys, so it cannot decrypt the video and audio data. The livekit server only knows the local pseudonym of the
-users, which is already known by the hub server.
+Again this can already be done with the current implementation of PubHubs, since the hub server can already pretend to
+be a user. The hub can change how a message is displayed and make it appear as if it was sent by someone else. The
+hub itself can make changes to the hub client code and pubhubs has no control over this. This is a tradeoff that is
+already made in PubHubs, and the other features that run in the hub client have the same implications.
 
+\section{Availability}
+In our video conferencing solution we use an SFU, this give us great flexibility in terms of scalability. The
+ability to deploy Livekit on separate servers and scale horizontally means that the solution can handle a large
+number of participants without compromising the functionality of the rest of PubHubs. This is however up to the hub
+to decide and configure, which should be made very clear to the hub administrators. The hub administrators should
+calculate what an acceptable number of participants is and how much resources they are willing to allocate to the
+video conferencing solution. Currently this is a rather technical process, which could be made easier in the future
+by providing some guidelines or even an automatic scaling solution.
+
+A potential attack vector is that an attacker can try to overload the hub server by creating many video calls. This
+is why we have the possibility to have the SFU on a separate server, this way the hub server will not be overloaded
+and only the video conferencing solution will be affected. This does bring more complexity to the system, which a
+admin needs to manage. Pubhubs could also offer a service where they host the livekit server and have different
+pricing tiers depending on the number of participants. This can become a potential revenue stream for Pubhubs.
+
+\section{Authentication}
+The solution uses the same authentication mechanism as the rest of PubHubs. A user would need to authenticate with the
+hub server before they receive a token for the livekit server. Currently we only check if the user is allowed to
+join the room. This can be a regular room, direct message room (1-to-1 room) or even a secured room. With the later we know that the user has
+disclosed the required attributes to join the secured room. However, for some use cases we might want to have more
+control over who can join the call. For instance when we do not want to allow all users to join a call. In direct
+messages rooms we might want to have the user disclose their identity before they can join the call, to
+make sure we are actually calling the right person and not an impersonator.
+
+Although such a feature sounds reasonable we would argue that this is not necessary since you can have a similar
+result by only allowing video conferencing in secured rooms. You would then set up these secured rooms with the
+desired attributes and then start a call in that rooms. We believe that this is fine in most cases, since it would
+not make sense to have a group call in a public room where you want to ensure that the participants have certain attributes. The only setback is that you need to
+set up a secured room before you can start a call, but as long as the attributes are not changed regularly you can
+reuse the same room.
+
+\section{Privacy}
+In our design we introduced a new server, the livekit server. This server is used to handle the video and audio data
+of the users. This server is in the same trust domain as the hub server. In our design we made sure that the livekit
+server did not know more information about the users than the hub server. When a call is started, the livekit server
+then knows the local pseudonym of the user and the room name. This is the same information that the hub server already
+knows, so this does not leak any more information. The livekit server does not have access to the video and audio data
+since it is encrypted and the server does not have access to the keys. This is even one step further than the current
+implementation of PubHubs, since the hub server can see the messages of the users.
+
+\chapter{Conclusion}
 
 
 \chapter{Future work}
+\section{Video conferencing use case for PubHubs}
+The video conferencing solution proposed in this thesis is a generic solution that can be used in any hub. However,
+there are some use cases where the video conferencing solution needs be tailored to the specific needs of the hub.
+The design would not change but some implementation details would. However currently we do not know what exactly the
+requirements are for these use cases. We would need to do requirements engineering to determine what the hubs require.
+This is something that can be done in the future, but is out of scope for this research.
+
 \section{Speaker-to-audience}
 As mentioned previously, we have three types of video conferencing. We have only implemented the one-on-one type and
 the group type. However there might still be a need for speaker-to-audience type of video conferencing, for instance
@@ -681,20 +722,6 @@ their video and audio stream to the speaker. The later we is not even needed at 
 achievable with the current setup, since we would need to send the video and audio stream to all the audience members.
 Currently it would be hard to develop this feature without a clear use case, since depending on the use case we can
 see what we can optimize. More research and requirements engineering is needed to build such a feature.
-
-% speaker-to-audience
-\section{Video conferncing access management}
-When a user wants to join a call, this solution only checks if the user is a member of the room. This can be a
-redular room, direct message room (1-to-1 room) or even a secured room. With the later we know that the user has
-disclosed the required attributes to join the secured room. However, for some use cases we might want to have more
-control over who can join the call. For instance when we do not want to allow all users to join a call. In direct
-messages rooms we might want to have the user disclose their identity before they can join the call, to
-make sure we are actually calling the right person and not an impersonator.
-
-If we were to implement this, we would need to know what the exact use cases are and what the requirements are for
-these use cases. Currently we can simply use the secured rooms to create a similar effect, however this might not be
-a very elegant solution for some use cases. Currently more research is needed to determine what the exact requirements
-are for this feature.
 
 \section{End-to-end encryption for other messages}
 The current implementation only encrypts the video and audio data. In order to enable this, we need to initialize the
