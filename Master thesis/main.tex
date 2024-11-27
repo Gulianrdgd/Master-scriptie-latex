@@ -352,10 +352,6 @@ also makes PubHubs dependent on Livekit, which is a third-party service.
 
 
 \chapter{Requirements}
-%\section{CIA}
-%The CIA triad is a model designed to guide policies for information security within an organization. The model
-%consists of three core principles: Confidentiality, Integrity, and Availability. These principles are used to
-%evaluate the security of an information system. We will
 
 \section{Confidentiality}
 Confidentiality is the principle that information is not made available or disclosed to unauthorized individuals,
@@ -427,7 +423,7 @@ We want the video conferencing solution to be easy to use and understandable. It
 features that we come to expect from video conferencing solutions. We want to have basic features like muting the
 microphone or the camera, seeing who is in the call, and sharing your screen. We also want to have some more advanced
 features like noise suppression and video simulcast. These features are not strictly necessary, but they can greatly
-improve the user experience.
+improve the user experience \cite{Skowronek_Raake_Berndtsson_Rummukainen_Usai_Gunkel_Johanson_Habets_Malfait_Lindero_et al._2022}.
 
 PubHubs is a platform that is still in development and is constantly changing. This means that the video
 conferencing solution should be able to adapt to these changes. PubHubs is also meant as a very configurable platform
@@ -446,7 +442,7 @@ and lastly the encryption. We will also discuss the front end setup, which is no
 conferencing solution, but is included in this prototype. We have included a diagram which shows the different parts
 and how they interact with each other.
 
-In the figure, the user is using the PubHubs client to join a room. We can see the PubHubs central server, the hub
+In \autoref{fig:video-conference-setup}, the user is using the PubHubs client to join a room. We can see the PubHubs central server, the hub
 server, and the livekit server. The PubHubs central server is used to authenticate the user, the red line shows that
 the user is not yet authenticated and the green line shows that the user is authenticated. In the figure we can also see
 the contents of the videoCall store, which is used in the hub client. This will be discussed in the following sections.
@@ -500,8 +496,11 @@ The livekit server can handle a lot of traffic, but when the hub is considerably
 might be a good idea to have a physically separate livekit server. This way, the hub server will not be overloaded with
 video traffic and can still serve the rest of the users. The livekit server can also scale horizontally to handle
 more traffic. This is simply a matter of deploying more livekit servers and configuring them to work together.
-Livekit provides a CLI tool which can give an indication what the maximum number of users is that a livekit server
-can handle. This way, the hub server can decide when to scale up the livekit server.
+Research has showed that the CPU utilization increases linearly based on the amount of participants in a call
+\cite{Muscariello_Papalini_Roques_Sardara_Tran Van_2023}, so the hub can easily decide what amount of users they want to
+support. Livekit also provides a CLI tool which can give an indication what the maximum number of users is that a
+livekit server can handle.
+
 
 To give some indication, a livekit server running in a Google cloud compute instance with 16 cores (
 c2-standard-16), has around 85 \% CPU utilization when 150 users with 720p video and audio are connected
@@ -704,18 +703,32 @@ make sure we are actually calling the right person and not an impersonator.
 Although such a feature sounds reasonable we would argue that this is not necessary since you can have a similar
 result by only allowing video conferencing in secured rooms. You would then set up these secured rooms with the
 desired attributes and then start a call in that rooms. We believe that this is fine in most cases, since it would
-not make sense to have a group call in a public room where you want to ensure that the participants have certain attributes. The only setback is that you need to
-set up a secured room before you can start a call, but as long as the attributes are not changed regularly you can
-reuse the same room.
+not make sense to have a group call in a public room where you want to ensure that the participants have certain attributes.
+The only setback is that you need to set up a secured room before you can start a call, but as long as the attributes
+are not changed regularly you can reuse the same room.
 
 \section{Privacy}
-In our design we introduced a new server, the livekit server. This server is used to handle the video and audio data
-of the users. This server is in the same trust domain as the hub server. In our design we made sure that the livekit
-server did not know more information about the users than the hub server. When a call is started, the livekit server
-then knows the local pseudonym of the user and the room name. This is the same information that the hub server already
-knows, so this does not leak any more information. The livekit server does not have access to the video and audio data
-since it is encrypted and the server does not have access to the keys. This is even one step further than the current
-implementation of PubHubs, since the hub server can see the messages of the users.
+In our design we introduced a new server, the livekit server. This server is used to forward the video and audio data
+of the users, the server should not do anything else. Creating (video conferencing) rooms and allowing users to join
+those rooms will be done by the hub server. The livekit server is controlled and managed by the hub administrator. In
+our design we made sure that the livekit server did not know more information about the users than the hub server.
+
+When a call is started, the livekit server then knows the local pseudonym of the user and the room name. This is the
+same information that the hub server already knows, so this does not leak any additional information. The livekit server
+does not have access to the video and audio data since it is encrypted and the server does not have access to the keys.
+This is even one step further than the current implementation of PubHubs, since the hub server can see the messages of
+the users as they are sent in plaintext.
+
+The hub can choose to have livekit host the livekit server, this would make the setup easier for the hub administrator.
+We do not recommend this since this would mean that we would leak some information to livekit. Livekit would then know
+the local pseudonyms of the users and some metadata about the call. This is a tradeoff that the hub administrator will
+have to make and be transparent about to the users.
+
+Other then the technical aspect it is also important to discuss privacy leakage that is inherent to video conferencing.
+When communicating by video, users may inadvertently reveal personal information through their surroundings or
+appearance. These small pieces of information can be used to identify or profile users \cite{Kagan_Alpert_Fire_2024},
+even if for instance a virtual background is used \cite{Hilgefort_Arp_Rieck_2021}. Users and admins of pubhubs should be aware of
+this risk and handle accordingly.
 
 \chapter{Conclusion}
 
