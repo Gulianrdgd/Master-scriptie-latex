@@ -131,33 +131,52 @@
         \emph{Daily supervisor:} \\
         \thesissupervisorsecond \\[1em]
         \emph{Second reader:} \\
-        \thesissecondreaderfirst\\
-        % \thesissecondreadersecond
+        \thesissecondreadersecond \\[1em]
     \end{flushright}
 \end{minipage}\\[4cm]
 \vfill
-%{\large \thesisdate}\\
-{\large \today}
+{\large \thesisdate}\\
+%{\large \today}
 \end{titlepage}
-
-\tableofcontents
 
 \newpage
 \section*{Abstract}
+As online communication becomes increasingly integral to remote work and collaboration, the need for secure and
+privacy-conscious platforms has never been greater. While mainstream platforms like Microsoft Teams and Slack
+dominate, they often compromise user privacy. PubHubs offers a  privacy-first alternative, built on a decentralized
+network of independent hubs with cryptographic safeguards to ensure user control over data. However, the lack of
+integrated video conferencing functionality limits its usability in today’s virtual environment. This research
+addresses this gap by designing and implementing an authenticated video conferencing solution for PubHubs. The
+solution aims to be secure, privacy-friendly, and scalable, in alignment with PubHubs’ core principles.
 
 
+\tableofcontents
 \chapter{Introduction}
-PubHubs is a platform which is currently still looking for a suitable use case. Although there are many privacy
-enhancing features present in PubHubs, many clients will not use it since it lacks features which are required for
-their use case. We believe that having the ability to video call within PubHubs can be a very useful feature, which
-for some clients is a necessity. This way, the privacy-friendly PubHubs can be used for numerous applications, like
-online consultations, online classes, or just to have a chat with friends. However, currently there are no
-organizations which are using PubHubs for this. So it is hard to say what the exact requirements are
-for video calling in PubHubs. We will make some requirements in terms of privacy, security, and usability which we
-will be in line with the current PubHubs principles. We will then design a video conferencing solution and implement
-this design into a prototype. This prototype will be evaluated on the requirements we have set.
+In todays digital landscape, privacy and security in online communication are more critical than ever.
+The COVID-19 pandemic accelerated a shift towards remote work and online communication, which for many people is here to stay.
+The online communication is mostly done on platforms like Microsoft Teams, Slack or Discord.
+However these platforms often fall short in protecting use privacy, which is a big concern when discussing sensitive
+information.
 
-\todo{Mention some requirements here}
+PubHubs is an alternative community platform that puts public values first.
+PubHubs is organized as a network of independent hubs, with a shared single-sign-on.
+Using cryptographic techniques, PubHubs ensures that users maintain control over their data while preserving
+accountability and verifiability. Pubhubs is still in development and currently only supports text-based communication.
+
+The lack of video conferencing functionality in pubhubs limits its utility in the real world where face-to-face
+virtual interactions are essential. Currently, users must rely on external video conferencing tools, which carry a
+significant risk of exposing identifying information. Pseudonymous users, for instance, may unintentionally reveal
+their real name or email address by remaining logged into these third-party platforms, undermining the core privacy
+values of PubHubs.
+
+In this research, we will design and implement a authenticated video conferencing solution for PubHubs. This
+solution should be secure, privacy-friendly, and scalable. We will define key requirements in terms of privacy,
+security, and usability, aligned with PubHubs’ principles. Based on these requirements, we will design and implement
+a prototype of the video conferencing solution. The prototype will be evaluated against the established criteria and
+serve as a foundation for future development. Additionally, this research will provide insights into the
+possibilities and challenges of integrating video conferencing into PubHubs.
+
+
 
 \chapter{Background}
 We first asses the current state of PubHubs as well as the different frameworks and technologies that we will use in
