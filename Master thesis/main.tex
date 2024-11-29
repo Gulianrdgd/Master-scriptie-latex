@@ -443,7 +443,7 @@ We want the video conferencing solution to be easy to use and understandable. It
 some quality of life features that we come to expect from video conferencing solutions. We want to have basic
 features like muting the microphone or the camera, seeing who is in the call, and sharing your screen. We also want
 to have some more advanced features like noise suppression and video simulcast. These features are not strictly
-necessary, but they can greatly improve the user experience \cite{Skowronek_Raake_Berndtsson_Rummukainen_Usai_Gunkel_Johanson_Habets_Malfait_Lindero_et al._2022}.
+necessary, but they can greatly improve the user experience \cite{skowronek_quality_2022}.
 Fully implementing these features is out of scope for this research, but we want to have the possibility to implement
 these features in the future.
 
@@ -520,7 +520,7 @@ might be a good idea to have a physically separate livekit server. This way, the
 video traffic and can still serve the rest of the users. The livekit server can also scale horizontally to handle
 more traffic. This is simply a matter of deploying more livekit servers and configuring them to work together.
 Research has showed that the CPU utilization increases linearly based on the amount of participants in a call
-\cite{Muscariello_Papalini_Roques_Sardara_Tran Van_2023}, so the hub can easily decide what amount of users they want to
+\cite{muscariello_securing_2023}, so the hub can easily decide what amount of users they want to
 support. Livekit also provides a CLI tool which can give an indication what the maximum number of users is that a
 livekit server can handle.
 
@@ -752,8 +752,8 @@ have to make and be transparent about to the users.
 
 Other then the technical aspect it is also important to discuss privacy leakage that is inherent to video conferencing.
 When communicating by video, users may inadvertently reveal personal information through their surroundings or
-appearance. These small pieces of information can be used to identify or profile users \cite{Kagan_Alpert_Fire_2024},
-even if for instance a virtual background is used \cite{Hilgefort_Arp_Rieck_2021}. This is not something that can be solved by the video conferencing solution, but
+appearance. These small pieces of information can be used to identify or profile users \cite{kagan_zooming_2024},
+even if for instance a virtual background is used \cite{hilgefort_spying_2021}. This is not something that can be solved by the video conferencing solution, but
 should be handled by the users and the hub administrators. Hub admins should make sure that the users are aware of
 this and should only enable video conferencing in certain rooms.
 
