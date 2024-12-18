@@ -383,7 +383,7 @@ When you join a Livekit video call, you actually join a Livekit room.
 These Livekit rooms can be different from the rooms in PubHubs, but we can easily map a PubHubs room to a Livekit room.
 For the purpose of this research, we will use a one-to-one mapping between PubHubs rooms and Livekit rooms. That means
 that when you start a call in a PubHubs room, you join a Livekit room with the same name. We will discuss this in more
-detail in \autoref{sec:server-setup} and discuss alternatives in \todo{Add ref}.
+detail in \autoref{sec:server-setup}.
 
 \chapter{Requirements}\label{chap:requirements}
 
@@ -446,9 +446,17 @@ only have a pseudonym, which is a local identity. For some use cases this might 
 such as online consultations, we want to be sure that we are actually calling a doctor.
 
 We could require certain attributes to be disclosed before a user can join a call. For example, a hub
-can require that a user has a certain age before they can enter a room. These attributes can be the same for both
-clients (symmetric) or it can be different attributes (asymmetric). For example, the doctor should disclose their license, but the patient should only
-disclose their name. We use Yivi to request and verify these attributes. \todo{Stuk aanpassen over verschillen rooms}
+can require that a user has a certain age before they can enter a call. These attributes can be the same for both
+clients (symmetric) or it can be different attributes (asymmetric). For example, the doctor should disclose their license,
+but the patient should only disclose their name. We use Yivi to request and verify these attributes.
+
+We could verify these attributes in multiple ways, a straight forward approach would be to require the user to provide
+these attributes when entering a call. However when you are in a secure room, you have probably already disclosed these
+attributes. Since we have a one-to-one mapping between PubHubs rooms and Livekit rooms, we can be sure that when the
+user is in the PubHubs room, they have already disclosed the required attributes. This way we can reuse code logic and
+have a more seamless experience for the user. You could even create \"temporary\" secured rooms when you only want
+to have a call with a certain person but this is out of scope for this research, since the implementation depends
+on the use case.
 
 We might also want the possibility to verify the attributes of the others users during the call ourselves. We also
 consider this out of scope for this research, since this is a feature that is not present in PubHubs. For now, we trust
@@ -481,10 +489,11 @@ conferencing solution, but is included in this prototype. We have included a dia
 and how they interact with each other.
 
 In \autoref{fig:video-conference-setup}, the user is using the PubHubs client to join a room. In this figure we can see
-the PubHubs central server, the hub server, and the Livekit server. The PubHubs central server is used to
-authenticate the user, the red line shows communication before the user is authenticated with the Livekit server, and
-the green line indicates the opposite. In the figure, we can also see the contents of the videoCall store, which is
-used in the hub client. This will be discussed in the following sections. \todo{Maybe change the colors in the figure}
+the hub docker container which in our prototype consists of the hub server and the Livekit server (other services
+are not depicted). The hub server is used to authenticate the user, after authentication the hub server creates the
+livekit room and the results are sent to the user. After these steps the call can begin and the users exchange keys
+and join the call. In the figure, we can also see the contents of the videoCall store, which is used in the hub
+client. This will be discussed in the following sections.
 
 \begin{figure}[!hbt]
 \centering
@@ -642,6 +651,10 @@ encryption for other messages in PubHubs. We have done some experiments with thi
 \caption{The current frontend}
 \label{fig:front-end-setup}
 \end{figure}
+The code can be found in this repository \cite{horst_gulianrdgdmaster-scriptie-pubhubs_2024}, it is a fork from the PubHubs
+repository which includes the video conferencing solution. The frontend code is written in TypeScript and uses Vue 3
+as the frontend framework. Styling is done using Tailwindcss. The backend code is written in Python and uses the
+python livekit server package.
 
 The video conferencing client is developed as an isolated component within PubHubs. This separation allows the
 video conferencing solution to be toggled on or off using a feature flag.
@@ -674,14 +687,12 @@ the video tiles will be cut off.
 The primary focus was on back-end implementation, but we still developed a primitive interface which can be easily
 extended in the future.
 We followed PubHubs’ design principles and reused as many components as possible to ensure that the user interface
-remains cohesive with the rest of the platform. We used the same JS framework (Vue 3) and styling framework (Tailwindcss)
-for the frontend components. Currently, little work in the backend is needed to make the video conferencing client production-ready, but the frontend still needs some work. The frontend does not have any quality
+remains cohesive with the rest of the platform. Currently, little work in the backend is needed to make the video
+conferencing client production-ready, but the frontend still needs some work. The frontend does not have any quality
 of life features that we come to expect from modern video conferencing solutions. Features like muting the
 microphone or the camera, seeing who is in the call, and sharing your screen are not yet implemented. The
 infrastructure is in place to add these features, and adding these features should be relatively easy. This is
 something that can be done in the future, but is out of scope for this research.
-
-\todo{Add a section about the code and github repo}
 
 \chapter{Discussion}
 The video conferencing solution proposed in this thesis aims to integrate confidential and secure authenticated video
