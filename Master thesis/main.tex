@@ -332,7 +332,7 @@ why we will use this in our implementation.
 
 \begin{figure}[!hbt]
 \centering
-\includegraphics[width=0.7\textwidth]{img/thesisDPD}
+\includegraphics[width=\textwidth]{img/thesisDPD}
 \caption{The three network topologies}
 \label{fig:three-options-video-conferencing}
 \end{figure}
@@ -350,23 +350,23 @@ communication. It is built on an open standard, which means that anyone can buil
 compatible with the Matrix protocol. User can even make proposals to change the protocol, which can then be voted on
 by the community. This protocol is continuously changing depending on the use cases of their users. These changes
 are then implemented in the multiple implementations of the protocol. The most well-known implementation is Synapse,
-which is the reference implementation of the matrix protocol and is also used by PubHubs.
+which is the reference implementation of the Matrix protocol and is also used by PubHubs.
 
-PubHubs can be considered a layer on top of matrix, which handles the identity management and adds some extra features.
-A hub will have to deploy a matrix home server, in this case synapse, and their hub client. This also means that you can
-access PubHubs hubs using any matrix client, with the downside that some PubHubs specific features are not available in
+PubHubs can be considered a layer on top of Matrix, which handles the identity management and adds some extra features.
+A hub will have to deploy a Matrix home server, in this case synapse, and their hub client. This also means that you can
+access PubHubs hubs using any Matrix client, with the downside that some PubHubs specific features are not available in
 all clients, such as requesting attributes using Yivi. Matrix is the fundamental layer of PubHubs, and it is
 important to keep in mind when designing and implementing new features. When designing the video conferencing
-solution, we will have to keep in mind the matrix protocol and only deviate from it when absolutely necessary.
+solution, we will have to keep in mind the Matrix protocol and only deviate from it when absolutely necessary.
 
 It is important to note that when talking about Matrix, it sometimes refers to the protocol and sometimes to the
 reference implementation. In this research, we will mostly talk about the protocol and not the implementation. These
 should be the same, but from time to time, there are differences. For instance, when a new feature is in the protocol
 but not yet implemented in the reference implementation. We are mostly interested in proposal 3401 \cite{
-noauthor_matrix-spec-proposalsproposals3401-group-voipmd_nodate}, since here matrix added functionality for video conferencing. This proposal
+noauthor_matrix-spec-proposalsproposals3401-group-voipmd_nodate}, since here Matrix added functionality for video conferencing. This proposal
 can be applied to all the above-mentioned server setups and describes a protocol for video conferencing.
 
-The same team that built matrix is also building Element \cite{noauthor_element_nodate}, which is an open-source matrix client.
+The same team that built Matrix is also building Element \cite{noauthor_element_nodate}, which is an open-source Matrix client.
 A new feature was added in 2022 \cite{noauthor_introducing_2022} to Element called Element call, which serves as an
 example implementation of proposal 3401 \cite{noauthor_matrix-spec-proposalsproposals3401-group-voipmd_nodate}.
 The Element team started by using peer-to-peer video conferencing, since this more closely resembled the decentralized
@@ -374,7 +374,7 @@ infrastructure of Matrix. However, this turned out to not be the best solution s
 participants and video conferencing required numerous computer  resources from participants. Recently, the Element team
 have released a new version that makes use of an open-source SFU called Livekit \cite{noauthor_livekit_nodate}.
 
-We will use this new Livekit implementation as a guide during our research; however, we will evaluate all the different
+We use this new Livekit implementation as a guide during our research; however, we evaluate all the different
 choices made for Element call and deviate from them based on the requirements of PubHubs. When using Livekit we can
 easily implement features like noise suppression or video simulcast (Sending multiple video streams with different
 qualities, to dynamically choose the quality according to a user's internet connection).
@@ -491,7 +491,7 @@ and how they interact with each other.
 In \autoref{fig:video-conference-setup}, the user is using the PubHubs client to join a room. In this figure we can see
 the hub docker container which in our prototype consists of the hub server and the Livekit server (other services
 are not depicted). The hub server is used to authenticate the user, after authentication the hub server creates the
-livekit room and the results are sent to the user. After these steps the call can begin and the users exchange keys
+Livekit room and the results are sent to the user. After these steps the call can begin and the users exchange keys
 and join the call. In the figure, we can also see the contents of the videoCall store, which is used in the hub
 client. This will be discussed in the following sections.
 
@@ -524,7 +524,7 @@ authentication token and check if the user is allowed to join the PubHubs room. 
 between PubHubs rooms and Livekit rooms. The hub server will then create a room on the Livekit server and return the
 room name to the user.
 
-The livekit server uses a token for authentication which is separate from the PubHubs authentication token.
+The Livekit server uses a token for authentication which is separate from the PubHubs authentication token.
 This token is generated by the Livekit server but can only be requested by the hub server.
 We have also created a new endpoint for this on the hub server. Similar to the previous endpoint, the hub server will
 authenticate the user and check if the user is allowed to join the PubHubs room. The hub server will then request a
@@ -537,7 +537,7 @@ server on a physically different server than the hub server, which would be bene
 system.
 
 For the check whether a user is allowed to join a room, we use the same function that secured rooms use. Currently,
-we only check if the user is allowed to join the pubhubs room, where the call is taking place. However, we can also
+we only check if the user is allowed to join the PubHubs room, where the call is taking place. However, we can also
 require the user to disclose certain YIVI attributes before we give them their token. This can easily be changed in the
 future, since we can repurpose the code which is used to request YIVI attributes for secured rooms. For now, we consider
 the inclusion of these attributes out of scope since you can have a similar result by only allowing video conferencing
@@ -568,16 +568,16 @@ is a tradeoff that the hub server will have to make.
 Our design also includes a video conferencing flow. The video conferencing flow describes the protocol and sequence
 of steps that the clients (users) will follow to set up and join a video call.
 This is a crucial part of the design, as it directly impacts the privacy and security of the video conferencing solution.
-In the video conferencing flow, we deviate somewhat from the original matrix specification. We follow the protocol
+In the video conferencing flow, we deviate somewhat from the original Matrix specification. We follow the protocol
 when setting up a call, but we do not implement the parts of the protocol which are used to manage the call. For
 instance, in the protocol, the user shares their media devices and whether their devices are muted. We will not use
 this since Livekit can handle this for us. We only need to know that a call has started in a room and the encryption
 keys of the participants. Livekit will provide us with an endpoint where we can send and receive our data, which in
 turn forwards it to the others in our room.
 
-We will thus only use the matrix protocol for setting up the room and sending the keys. This approach is also what
-matrix intends to do moving forward, as they have specified in a presentation \cite{nirve_matrixrtc_nodate}. The
-matrix team now supports both solutions in their client SDK.
+We will thus only use the Matrix protocol for setting up the room and sending the keys. This approach is also what
+Matrix intends to do moving forward, as they have specified in a presentation \cite{nirve_matrixrtc_nodate}. The
+Matrix team now supports both solutions in their client SDK.
 
 \begin{figure}
 \centering
@@ -617,8 +617,8 @@ mcgrew_galoiscounter_nodate}, to encrypt and authenticate the frames. This is a 
 cipher. It is also very fast and efficient, even working well on slower devices.
 
 The main problem at hand here is key management. For the encryption to work, we do need the keys from all
-participants. To get these keys, we followed the matrix specification for ease of implementation and code
-sustainability. As of the writing, matrix is in the middle of transitioning to a new spec where the client can more
+participants. To get these keys, we followed the Matrix specification for ease of implementation and code
+sustainability. As of the writing, Matrix is in the middle of transitioning to a new spec where the client can more
 directly request, revoke and rotate keys of the participants. Although we believe this would be a better solution, we
 decided to stick with the current implementation. This is because the new key management specification is not yet in
 the official Matrix specification.
@@ -630,18 +630,18 @@ Livekit, which in turn updates the keys and uses it for decryption. Although it 
 their keys. This is a feature that is supported by Livekit, but we did not implement it since it was out of scope.
 Other complex key generation schemes are also possible and can very easily be implemented.
 
-We use the standard matrix implementation to distribute the keys, it does so by sending the keys as special
-messages in a matrix room. This is not ideal, since the keys are sent in the clear and can be read by the server.
+We use the standard Matrix implementation to distribute the keys, it does so by sending the keys as special
+messages in a Matrix room. This is not ideal, since the keys are sent in the clear and can be read by the server.
 However, since the server does not have access to the video and audio data. This also prohibits us from having
 forward secrecy since if you are in the room but not in the video conference, you can still read the keys from
 before you joined the call. Matrix has functionality to send these keys via private direct messages to the
 participants in the call. However, this feature does not work with their new end-to-end encryption library. We have
-been in contact with the matrix team, and they are working on this feature, so we decided to leave the code as is
+been in contact with the Matrix team, and they are working on this feature, so we decided to leave the code as is
 and wait for the new implementation. This means that until we have the new implementation, we do not have perfect
 forward secrecy. As a temporary solution, you could create a secured room for every call and only allow the
 participants in the call to join the room.
 
-Since we need to initialize the matrix crypto library for the encryption, we can very easily enable end-to-end
+Since we need to initialize the Matrix crypto library for the encryption, we can very easily enable end-to-end
 encryption for other messages in PubHubs. We have done some experiments with this, which we will discuss in \autoref{sec:encryption_of_messages}.
 
 \section{The code and frontend}
@@ -654,7 +654,7 @@ encryption for other messages in PubHubs. We have done some experiments with thi
 The code can be found in this repository \cite{horst_gulianrdgdmaster-scriptie-pubhubs_2024}, it is a fork from the PubHubs
 repository which includes the video conferencing solution. The frontend code is written in TypeScript and uses Vue 3
 as the frontend framework. Styling is done using Tailwindcss. The backend code is written in Python and uses the
-python livekit server package.
+python Livekit server package.
 
 The video conferencing client is developed as an isolated component within PubHubs. This separation allows the
 video conferencing solution to be toggled on or off using a feature flag.
@@ -852,7 +852,7 @@ see what we can optimize. More research and requirements engineering is needed t
 
 \section{End-to-end encryption for other messages}\label{sec:encryption_of_messages}
 The current implementation only encrypts the video and audio data. In order to enable this, we need to initialize the
-matrix crypto library. This library can also be used to encrypt the other messages in PubHubs. We have experimented
+Matrix crypto library. This library can also be used to encrypt the other messages in PubHubs. We have experimented
 with this and have found that it is straightforward to enable this. However, some PubHubs features did not work as expected
 when we enabled this. This is something that is relatively easy to overcome, but more research is needed to determine
 what the other implications are of enabling this feature.
