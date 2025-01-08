@@ -90,7 +90,7 @@
 \newcommand\thesissupervisorsecond{Omar Javed}
 \newcommand\thesissecondreaderfirst{TBA}
 \newcommand\thesissecondreadersecond{Bram Westerbaan}
-\newcommand\thesisdate{Febraury 2024}
+\newcommand\thesisdate{February 2024}
 
 
 %% FOR PDF METADATA
@@ -216,9 +216,10 @@ you want to be sure that you are actually calling a doctor. This is where authen
 If we look at video conferencing from an architectural perspective, we see that there are multiple conferencing
 architectures. For this research, we will only distinguish three types. These types will most likely be different types
 of video conferencing that will occur on the PubHubs platform. We distinguish these types because
-they all have certain properties that yield different requirements for the video conferencing solution. The three
-types are:
+they all have certain properties that yield different requirements for the video conferencing solution. 
 
+\newpage
+The three types are:
 \begin{itemize}
 \item Person-to-person (one-on-one)
 \item Person-to-person (multiple people)
@@ -510,7 +511,7 @@ store, which is used in the hub client.
 \section{Server setup}\label{sec:server-setup}
 The hub server needs some changes to be able to handle video conferencing. Firstly, we will now also need to deploy a
 Livekit server instance. This Livekit server functions as an SFU and forwards all the video and audio traffic
-between the different clients. This server does not see the video conferencing data since the dat is end-to-end
+between the different clients. This server does not see the video conferencing data since the data is end-to-end
 encrypted and the server does not have access to the keys. The only thing that the Livekit server sees is the local
 pseudonym of the user and other metadata (such as duration of the call, IP address of the user, etc.). The hub
 server already knows this information, and thus this design does not leak additional data.
@@ -520,8 +521,8 @@ only allowing the hub server to create Livekit rooms. We do this by setting up t
 which is only known by the hub server. We have set up a new endpoint on the hub server such that the user can
 start a video call. The hub server will authenticate the user using the PubHubs authentication token and check if
 the user is allowed to join the PubHubs room. If this is the case, the hub server will then create a room on the
-Livekit server and return the room name to the user. If the Livekit room already exists then the hub client will not
-create a new room but will return the existing room name. This is the only way that a Livekit room can be created,
+Livekit server and return the room name to the user. If the Livekit room already exists, then the hub client will not
+create a new room and instead will return the existing room name. This is the only way that a Livekit room can be created,
 and it ensures that there is a one-to-one mapping between PubHubs rooms and Livekit rooms. Livekit rooms are automatically
 deleted after a certain timeout period, which is started after the last user leaves the call.
 
@@ -591,7 +592,7 @@ Matrix team now supports both solutions in their client SDK.
 To explain the flow, we will go through the flow of Alice starting a call with Bob.
 When Alice wants to start a call with Bob, she will send a call event with an intent. This intent can be
 everything from having the room automatically join to ringing the other participants. We did not implement
-these different behaviors in the pubhubs client since it was out-of-scope. After this, Alice's client will set up the
+these different behaviors in the PubHubs client, since it was out-of-scope. After this, Alice's client will set up the
 video conferencing screen, this is where she can choose her camera and microphone. When she is ready, Alice will
 send her encryption keys and will send to the others that she is a member of the call. She will then wait for any
 changes to the participants, if that happens, she will update her keys and send them to the others.
@@ -629,12 +630,13 @@ The standard Matrix implementation distributes the keys by sending the keys as s
 This is not ideal, since the keys are sent in the clear and can be read by the hub server. However, since the hub
 server does not have access to the video and audio data. This also prohibits us from having forward secrecy since if
 you are in the room but not in the video conference, you can still read the keys from before you joined the call.
-Matrix has functionality to send these keys via private direct messages to the participants in the call. However,
-this feature does not work yet with their new end-to-end encryption library. We have been in contact with the Matrix
-team, and they are working on this feature, so we decided to leave the code as is and wait for the new
-implementation. This means that until we have the new implementation, we do not have perfect forward secrecy. As a
-temporary solution, we could create a secured room for every call and only allow the participants in the call to
-join the room.
+
+Matrix has functionality to send these keys via private direct messages to the participants in the call. Bypassing
+the hubs completely and thus preventing the hub from ever seeing the keys. However, this feature does not work yet 
+with their new end-to-end encryption library. We have been in contact with the Matrix team, and they are working 
+on this feature, so we decided to leave the code as is and wait for the new implementation. This means that until
+we have the new implementation, we do not have perfect forward secrecy. As a temporary solution, we could create
+a secured room for every call and only allow the participants in the call to join the room.
 
 Whenever we are in a call, we subscribe to a \lstinline[language=js]{Matrix_RTC_Session}. This session handles
 memberships and properties of a session. This will give us messages when a new user is added or when the keys are
@@ -749,12 +751,12 @@ A potential attack vector is that an attacker can try to overload the hub server
 is why we have the possibility to have the SFU on a separate server, this way the hub server will not be overloaded
 and only the video conferencing solution will be affected. This does bring more complexity to the system, which an
 admin needs to manage.As mentioned previously, The hub server can also choose to have the company Livekit host the
-Livekit server or a Pubhubs hoster could provide a Livekit server as a service.
+Livekit server or a PubHubs hoster could provide a Livekit server as a service.
 
 \section{Authentication}
 The solution uses the same authentication mechanism as the rest of PubHubs. A user would need to authenticate with the
 hub server before they receive a token for the Livekit server. Currently, we only check if the user is allowed to
-join the room. This can be a regular room, a direct message room or even a secured room. With the latter, we know
+join the room. This can be a regular room, a direct message room, or even a secured room. With the latter, we know
 that the user has disclosed the required attributes to join the secured room. However, for some use cases, we might
 want to have more control over who can join the call. For instance, when we do not want to allow all users in a
 regular room to join a call. In direct messages rooms, we might want to have the user disclose their identity
@@ -764,7 +766,7 @@ Although such a feature sounds reasonable, we would argue that this is not neces
 result by only allowing video conferencing in secured rooms. You would then set up these secured rooms with the
 desired attributes and then start a call in those rooms. We believe that this is fine in most cases, since it would
 not make sense to have a group call in a public room where you want to ensure that the participants have certain attributes.
-The only setback is that you need to set up a secured room everytime before you can start a call, but as long as the
+The only setback is that you need to set up a secured room every time before you can start a call, but as long as the
 attributes are not changed regularly you can reuse the same room.
 
 \section{Privacy}
@@ -814,7 +816,7 @@ the required attributes.
 The solution also ensures availability for both the hub and the video conferencing service by using an SFU. This
 allows the hub to host the video conferencing solution on a separate server and scale horizontally as needed. This
 ensures that the hub server is not overloaded with video traffic and can continue to serve other PubHubs features.
-The flexible setup also offers potential as a revenue stream for Pubhubs.
+The flexible setup also offers potential as a revenue stream for PubHubs.
 
 The frontend implementation currently supports a limited number of participants and lacks advanced features like
 screen sharing and muting. These features can be easily added in future iterations, but were out-of-scope for this
