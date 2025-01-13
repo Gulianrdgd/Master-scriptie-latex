@@ -442,7 +442,7 @@ and receive more and more data with every new participant. This is not a scalabl
 an SFU. These still have a limit on the number of participants, but this limit is based on the SFU servers resources.
 
 This can be an attack vector, since an attacker can try to overload the hub server by creating many video
-calls. We therefore need to have the possibility to have the SFU on a separate server as well as the possibility to
+calls. We therefore need to have the possibility to have the SFU on a separate server, as well as the possibility to
 scale the SFU server horizontally. This means that we can deploy multiple SFU servers and have them work together.
 This way, the load can be distributed over multiple (separate) servers, and not impact the rest of PubHubs.
 
@@ -543,8 +543,8 @@ the scalability of the system.
 
 For the check whether a user is allowed to join a room, we use the same function that secured rooms use. Currently,
 we only check if the user is allowed to join the PubHubs room, where the call is taking place. However, we can also
-require the user to disclose certain YIVI attributes before we give them their token. This can easily be changed in the
-future, since we can repurpose the code which is used to request YIVI attributes for secured rooms. For now, we consider
+require the user to disclose certain Yivi attributes before we give them their token. This can easily be changed in the
+future, since we can repurpose the code which is used to request Yivi attributes for secured rooms. For now, we consider
 the inclusion of these attributes out-of-scope since we can have a similar result by allowing video conferencing
 only in secured rooms, which have the required attributes.
 
@@ -558,7 +558,7 @@ they want to support and predict what server requirements they will need. Liveki
 can give an indication what the maximum number of users is that the current server can handle.
 
 To give some indication, a Livekit server running in a Google cloud compute instance with 16 cores
-(c2-standard-16), has around 85 \% CPU utilization when 150 users with 720p video and audio are connected
+(c2-standard-16), has around 85\% CPU utilization when 150 users with 720p video and audio are connected
 \cite{noauthor_benchmarking_nodate}. The hub sever can also choose to completely outsource the Livekit server.
 Livekit provides a paid service where they will host the Livekit server for you. This service scales
 automatically, and the servers are distributed globally. This way the users will always have a proper low
@@ -658,9 +658,9 @@ encryption for other messages in PubHubs. We have done some experiments with thi
 \caption{A video call experiment with three participants. Each being the same individual (The author)}
 \label{fig:front-end-setup}
 \end{figure}
-The code can be found in this github repository \cite{horst_gulianrdgdmaster-scriptie-pubhubs_2024}, it is a fork from the PubHubs
+The code can be found in this GitHub repository \cite{horst_gulianrdgdmaster-scriptie-pubhubs_2024}, it is a fork from the PubHubs
 repository which includes the video conferencing solution. The frontend code is written in TypeScript and uses Vue 3
-as the frontend framework. Styling is done using TailwindCSS. The backend code is written in Python and uses the
+as the frontend framework. Styling is done using Tailwind CSS. The backend code is written in Python and uses the
 Python Livekit server package.
 
 The video conferencing client is developed as an isolated component within PubHubs. This separation allows the
@@ -681,7 +681,7 @@ solution between different hubs, which could be confusing for the users. This is
 PubHubs, and the other features that run in the hub client have the same implications.
 
 Having the video conferencing code inside the hub client means that it is inside the hub client Iframe.
-This turned out to be a problem, when requesting the devices Camera and Microphone access. Because of security reasons, the
+This turned out to be a problem, when requesting the device's Camera and Microphone access. Because of security reasons, the
 sandbox attribute is set on the Iframe. This means that the Iframe cannot request certain secure attributes.
 Access to the camera and microphone are considered secure attributes.
 To allow access without removing the iframe’s sandbox attribute, we opted to add the allow attribute and added
